@@ -445,7 +445,6 @@ centered_textures = true
 collision_mask = 0
 format = 1
 script = ExtResource( 1 )
-debug_draw_padding = false
 
 [node name="Camera2D" type="Camera2D" parent="Navigation2D/Tiles"]
 visible = false

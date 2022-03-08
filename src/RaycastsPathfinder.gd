@@ -21,56 +21,82 @@ func find_shortest_path(start: Vector2, end: Vector2) -> PoolVector2Array:
 	var raycast_end: = create_raycast(end)
 	raycast_start.add_exception(grid.get_area2D_at(end))
 	raycast_end.add_exception(grid.get_area2D_at(start))
-	var distance_between_tiles: = raycast_start.global_position.distance_to(
-		raycast_end.global_position)
+	var distance: = grid.board_size * grid.cell_size
 	
-	# Try connecting them directly
-	if raycast_start.global_position.direction_to(
-		raycast_end.global_position) in DIRECTIONS:
-			raycast_start.cast_to = raycast_start.global_position.direction_to(
-				raycast_end.global_position) * distance_between_tiles
-			raycast_start.force_raycast_update()
-			if not raycast_start.is_colliding():
-				var connecting_line: = Line2D.new()
-				connecting_line.points = [
-					raycast_start.global_position,
-					raycast_end.global_position]
-				return raycasts_to_path(raycast_start, raycast_end, connecting_line)
-	else:
-		pass
+	for direction in get_possible_directions(raycast_start, raycast_end):
+		raycast_start.cast_to = direction * grid.get_used_rect_world().size
+		raycast_end.cast_to = direction * grid.get_used_rect_world().size
+		raycast_start.force_raycast_update()
+		raycast_end.force_raycast_update()
+		var connecting_raycast = get_connecting_raycast(raycast_start, raycast_end)
+		if connecting_raycast:
+			return raycasts_to_path(raycast_start, raycast_end, connecting_raycast)
+				
 	return PoolVector2Array([])
 
-func get_parallel_lines(raycast_start: PathRaycast, raycast_end: PathRaycast) -> Array:
-	var parallel_lines = []
-	var distance: = raycast_start.global_position.distance_to(
-		raycast_end.global_position)
-	for end_direction in DIRECTIONS:
-		for start_direction in DIRECTIONS:
-			raycast_end.cast_to = end_direction * distance
-			raycast_start.cast_to = start_direction * distance
+func is_within_board(raycast: PathRaycast) -> bool:
+	var board: Rect2 = grid.get_used_rect_world(true)
+	return board.has_point(raycast.global_position) and board.has_point(raycast.cast_to.abs())
+
+# gets two parallel raycasts and tries to create a third raycast that connects them
+func get_connecting_raycast(
+	raycast_start: PathRaycast, 
+	raycast_end: PathRaycast) -> PathRaycast:
+		assert(raycast_start.cast_to.normalized() == raycast_end.cast_to.normalized())
+		var direction: Vector2 = raycast_start.cast_to.normalized()
+		var connecting_raycast: = create_raycast(
+			grid.world_to_map(raycast_start.global_position))
+		connecting_raycast.cast_to = (
+			raycast_start.global_position.direction_to(
+			raycast_end.global_position)) * (
+			raycast_start.global_position.distance_to(
+			raycast_end.global_position))
+		connecting_raycast.force_raycast_update()
+		while(is_within_board(connecting_raycast)):
+			if not connecting_raycast.is_colliding():
+				return connecting_raycast
+			connecting_raycast.global_position += direction * grid.cell_size
+			connecting_raycast.force_raycast_update()
+		return null
+		
+
+# Look for directions that when a 
+# ray is cast toward that direction, there is no collision
+func get_possible_directions(
+	raycast_start: PathRaycast, 
+	raycast_end: PathRaycast) -> PoolVector2Array:
+		var possible_directions = []
+		var distance: = raycast_start.global_position.distance_to(
+			raycast_end.global_position)
+		for direction in DIRECTIONS:
+			raycast_end.cast_to = direction * distance
+			raycast_start.cast_to = direction * distance
 			raycast_start.force_raycast_update()
 			raycast_end.force_raycast_update()
 			if not raycast_start.is_colliding() and not raycast_end.is_colliding():
-				if start_direction == end_direction:
-					var line1 = PoolVector2Array([
-						raycast_start.global_position,
-						raycast_start.cast_to])
-					var line2 = PoolVector2Array([
-						raycast_end.global_position,
-						raycast_end.cast_to])
-					parallel_lines.append([line1, line2])
-	return parallel_lines
+				possible_directions.append(direction)
+		return possible_directions
+
+# Gets a raycast and returns all the cells it passes through
+func raycast_to_cells(raycast: PathRaycast) -> PoolVector2Array:
+	var cells: = PoolVector2Array([])
+	var start_point = grid.world_to_map(raycast.global_position)
+	var end_point = grid.world_to_map(raycast.cast_to)
+	var direction = start_point.direction_to(end_point)
+	assert(direction in DIRECTIONS)
+	var current_cell = start_point
+	while current_cell != end_point:
+		cells.append(current_cell)
+		current_cell += direction
+	return cells
 
 func raycasts_to_path(
-	raycast1: RayCast2D, 
-	raycast2: RayCast2D, 
-	connecting_line: Line2D) -> PoolVector2Array:
-		var path: = PoolVector2Array([
-			raycast1.global_position,
-			connecting_line.points[0],
-			connecting_line.points[1],
-			raycast2.cast_to
-		])
+	raycast_start: RayCast2D, 
+	raycast_end: RayCast2D, 
+	connecting_raycast: RayCast2D) -> PoolVector2Array:
+		var path: = raycast_to_cells(raycast_start)
+		path.append_array(raycast_to_cells(connecting_raycast))
+		path.append_array(raycast_to_cells(raycast_end))
 		return path
 
 	

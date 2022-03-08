@@ -7,6 +7,7 @@ const TILE = preload("Tile.tscn")
 
 export var board_size: = DEFAULT_BOARD_SIZE setget set_board_size
 export var debug_draw_padding: bool = true
+export var draw_border: = true
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
 
@@ -63,8 +64,9 @@ func find_path(from: Vector2, to: Vector2) -> PoolVector2Array:
 	var path: = PoolVector2Array([])
 	if get_cellv(from) == get_cellv(to):
 		var pathfinder = Pathfinder.new(self, get_cells_for_path(from, to))
-		$RaycastsPathfinder.find_shortest_path(from, to)
-		path = pathfinder.calculate_point_path(from, to)
+		#$RaycastsPathfinder.find_shortest_path(from, to)
+		#path = pathfinder.calculate_point_path(from, to)
+		path = $RaycastsPathfinder.find_shortest_path(from, to)
 	return path
 
 func draw_path(path: PoolVector2Array, time_on_screen: float = 0.3) -> void:
@@ -137,6 +139,13 @@ func _draw() -> void:
 			false,
 			2
 		)
+	if draw_border:
+		draw_rect(
+			get_used_rect_world(true), 
+			Color.white,
+			false,
+			2
+		)
 	if debug_draw_padding:
 		for y in board_size.y + 1:
 			for x in board_size.x + 1:
@@ -175,9 +184,12 @@ func setup_board() -> void:
 	$Camera2D.position = get_used_rect_world().position + get_used_rect_world().size / 2
 		
 		
-func get_used_rect_world() -> Rect2:
+func get_used_rect_world(include_padding: = false) -> Rect2:
 	var used_rect_position = map_to_world(get_used_rect().position)
 	var used_rect_size = cell_size * get_used_rect().size
+	if include_padding:
+		used_rect_position -= cell_size
+		used_rect_size += cell_size * 2
 	return Rect2(used_rect_position, used_rect_size)
 
 func is_border_cell(cords: Vector2) -> bool:
@@ -223,9 +235,12 @@ func get_area2D_at(cell: Vector2) -> Area2D:
 	return _tiles_areas2D.get(cell)
 
 func _setup_colllision() -> void:
+	for node in get_tree().get_nodes_in_group("tile_areas"):
+		node.queue_free()
 	for cell in get_all_cells(false):
 		var new_tile_area = TILE.instance()
 		add_child(new_tile_area)
+		new_tile_area.add_to_group("tile_areas")
 		new_tile_area.setup(
 			cell_size,
 			map_to_world(cell) + cell_size / 2)
