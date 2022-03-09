@@ -69,7 +69,7 @@ func find_path(from: Vector2, to: Vector2) -> PoolVector2Array:
 		path = $RaycastsPathfinder.find_shortest_path(from, to)
 	return path
 
-func draw_path(path: PoolVector2Array, time_on_screen: float = 0.3) -> void:
+func draw_path(path: PoolVector2Array, time_on_screen: float = 1) -> void:
 	$UnitPath.draw(path)
 # warning-ignore:return_value_discarded
 	get_tree().create_timer(time_on_screen).connect(
@@ -182,7 +182,9 @@ func setup_board() -> void:
 		set_cellv(cell1, tile_id)
 		set_cellv(cell2, tile_id)
 	$Camera2D.position = get_used_rect_world().position + get_used_rect_world().size / 2
-		
+
+func get_rect() -> Rect2:
+	return Rect2(Vector2.ZERO, board_size)
 		
 func get_used_rect_world(include_padding: = false) -> Rect2:
 	var used_rect_position = map_to_world(get_used_rect().position)
@@ -196,6 +198,9 @@ func is_border_cell(cords: Vector2) -> bool:
 	return (
 		cords.x == 0 or cords.x == board_size.x) or (
 		cords.y == 0 or cords.y == board_size.y)	
+
+func is_within_board(cell: Vector2) -> bool:
+	return get_used_rect().has_point(cell) or is_border_cell(cell)
 			
 func get_random_tile() -> int:
 	var all_tiles = tile_set.get_tiles_ids()

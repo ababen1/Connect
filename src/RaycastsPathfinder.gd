@@ -17,12 +17,20 @@ func create_raycast(cell: Vector2) -> PathRaycast:
 	return raycast
 
 func find_shortest_path(start: Vector2, end: Vector2) -> PoolVector2Array:
+	clear_raycasts()
+	if end < start:
+		var temp = start
+		start = end
+		end = temp
 	var raycast_start: = create_raycast(start)
 	var raycast_end: = create_raycast(end)
 	raycast_start.add_exception(grid.get_area2D_at(end))
 	raycast_end.add_exception(grid.get_area2D_at(start))
-	var distance: = grid.board_size * grid.cell_size
 	
+	var direct_path = find_direct_path(raycast_start, raycast_end)
+	if direct_path:
+		return direct_path
+		
 	for direction in get_possible_directions(raycast_start, raycast_end):
 		raycast_start.cast_to = direction * grid.get_used_rect_world().size
 		raycast_end.cast_to = direction * grid.get_used_rect_world().size
@@ -30,13 +38,30 @@ func find_shortest_path(start: Vector2, end: Vector2) -> PoolVector2Array:
 		raycast_end.force_raycast_update()
 		var connecting_raycast = get_connecting_raycast(raycast_start, raycast_end)
 		if connecting_raycast:
-			return raycasts_to_path(raycast_start, raycast_end, connecting_raycast)
+			var path = raycasts_to_path(
+				raycast_start, raycast_end, connecting_raycast)
+			path.push_back(end)
+			path.insert(0, start)
+			return path
 				
 	return PoolVector2Array([])
 
-func is_within_board(raycast: PathRaycast) -> bool:
+func is_raycast_within_board(raycast: PathRaycast) -> bool:
 	var board: Rect2 = grid.get_used_rect_world(true)
-	return board.has_point(raycast.global_position) and board.has_point(raycast.cast_to.abs())
+	return board.has_point(raycast.global_position.abs()) and board.has_point(raycast.cast_to.abs())
+
+func find_direct_path(
+	raycast_start: PathRaycast, 
+	raycast_end: PathRaycast) -> PoolVector2Array:
+		var direction = raycast_start.global_position.direction_to(
+			raycast_end.global_position)
+		if direction in DIRECTIONS:
+			raycast_start.cast_to = direction * raycast_start.global_position.distance_to(
+				raycast_end.global_position)
+			raycast_start.force_raycast_update()
+			if not raycast_start.is_colliding():
+				return raycast_to_cells(raycast_start)
+		return PoolVector2Array([])
 
 # gets two parallel raycasts and tries to create a third raycast that connects them
 func get_connecting_raycast(
@@ -44,15 +69,18 @@ func get_connecting_raycast(
 	raycast_end: PathRaycast) -> PathRaycast:
 		assert(raycast_start.cast_to.normalized() == raycast_end.cast_to.normalized())
 		var direction: Vector2 = raycast_start.cast_to.normalized()
+		var perpendicular_direction: = Vector2(-direction.y, direction.x)
+		
 		var connecting_raycast: = create_raycast(
 			grid.world_to_map(raycast_start.global_position))
-		connecting_raycast.cast_to = (
-			raycast_start.global_position.direction_to(
-			raycast_end.global_position)) * (
+		connecting_raycast.cast_to = perpendicular_direction * (
 			raycast_start.global_position.distance_to(
 			raycast_end.global_position))
+		if not connecting_raycast.global_position + connecting_raycast.cast_to == raycast_end.global_position:
+				connecting_raycast.cast_to *= -1
+				
 		connecting_raycast.force_raycast_update()
-		while(is_within_board(connecting_raycast)):
+		while(is_raycast_within_board(connecting_raycast)):
 			if not connecting_raycast.is_colliding():
 				return connecting_raycast
 			connecting_raycast.global_position += direction * grid.cell_size
@@ -81,13 +109,14 @@ func get_possible_directions(
 func raycast_to_cells(raycast: PathRaycast) -> PoolVector2Array:
 	var cells: = PoolVector2Array([])
 	var start_point = grid.world_to_map(raycast.global_position)
-	var end_point = grid.world_to_map(raycast.cast_to)
-	var direction = start_point.direction_to(end_point)
+	var end_point = grid.world_to_map(raycast.global_position + raycast.cast_to)
+	var direction = raycast.cast_to.normalized()
 	assert(direction in DIRECTIONS)
 	var current_cell = start_point
-	while current_cell != end_point:
+	while current_cell != end_point and grid.is_within_board(current_cell):
 		cells.append(current_cell)
 		current_cell += direction
+	cells.append(end_point)
 	return cells
 
 func raycasts_to_path(
@@ -99,4 +128,7 @@ func raycasts_to_path(
 		path.append_array(raycast_to_cells(raycast_end))
 		return path
 
-	
+func clear_raycasts() -> void:
+	for child in get_children():
+		if child is PathRaycast:
+			child.queue_free()
