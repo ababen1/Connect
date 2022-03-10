@@ -36,7 +36,6 @@ func _unhandled_input(event: InputEvent) -> void:
 					var path: = find_path(selected_cell, cell_clicked)
 					if not path.empty():
 						draw_path(path)
-						yield($UnitPath, "path_deleted")
 						var pair = TilesPair.new(selected_cell, cell_clicked)
 						remove_pair(pair)
 						emit_signal("pair_cleared", pair)

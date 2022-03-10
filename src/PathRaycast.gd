@@ -9,3 +9,6 @@ func _init() -> void:
 	collide_with_areas = true
 	enabled = true
 	collision_mask = TILES_COLLISION_LAYER
+
+func get_casting_global_pos() -> Vector2:
+	return global_position + cast_to
