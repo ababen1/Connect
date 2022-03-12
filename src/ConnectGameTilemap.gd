@@ -229,7 +229,7 @@ func get_mouse_cell() -> Vector2:
 	return world_to_map(to_local(get_mouse_pos()))
 
 func get_area2D_at(cell: Vector2) -> Area2D:
-	return _tiles_areas2D.get(cell)
+	return _tiles_areas2D.get(cell, null)
 
 func check_win() -> bool:
 	return get_used_cells().empty()

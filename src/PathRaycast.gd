@@ -12,3 +12,6 @@ func _init() -> void:
 
 func get_casting_global_pos() -> Vector2:
 	return global_position + cast_to
+
+func get_length() -> float:
+	return global_position.distance_to(get_casting_global_pos())
