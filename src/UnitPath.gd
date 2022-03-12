@@ -7,7 +7,6 @@ signal path_deleted
 
 ## Finds and draws the path between `cell_start` and `cell_end`
 func draw(current_path: PoolVector2Array) -> void:
-	clear()
 	for point in current_path:
 		set_cellv(point, 1)
 	update_bitmask_region()

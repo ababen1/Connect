@@ -14,6 +14,7 @@ func _create_raycast(cell: Vector2) -> PathRaycast:
 	raycast.add_exception(grid.get_area2D_at(cell))
 	raycast.global_position = grid.to_global(
 		grid.map_to_world(cell)) + grid.cell_size / 2
+	
 	return raycast
 
 func is_raycast_within_board(raycast: PathRaycast) -> bool:

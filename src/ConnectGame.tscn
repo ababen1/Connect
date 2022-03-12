@@ -1,13 +1,15 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://src/ConnectGameTilemap.gd" type="Script" id=1]
 [ext_resource path="res://assets/icons_sheet.png" type="Texture" id=2]
 [ext_resource path="res://src/UnitPath.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/UI/DebugLabels.gd" type="Script" id=4]
 [ext_resource path="res://src/ConnectGame.gd" type="Script" id=5]
+[ext_resource path="res://src/UI/LevelCompleteDialog.gd" type="Script" id=6]
 [ext_resource path="res://src/UI/TimeLeft.gd" type="Script" id=7]
 [ext_resource path="res://src/UI/GameOverDialog.gd" type="Script" id=8]
 [ext_resource path="res://src/RaycastsPathfinder.gd" type="Script" id=9]
+[ext_resource path="res://src/UI/ConnectGameUI.gd" type="Script" id=10]
 
 [sub_resource type="TileSet" id=1]
 0/name = "icons_sheet.png 0"
@@ -433,11 +435,12 @@
 
 [node name="ConnectGame" type="Node2D"]
 script = ExtResource( 5 )
-time_limit = 210.0
 
-[node name="Navigation2D" type="Navigation2D" parent="."]
+[node name="Timer" type="Timer" parent="."]
+wait_time = 150.0
+one_shot = true
 
-[node name="Tiles" type="TileMap" parent="Navigation2D"]
+[node name="Tiles" type="TileMap" parent="."]
 tile_set = SubResource( 1 )
 cell_size = Vector2( 16, 16 )
 cell_tile_origin = 1
@@ -445,24 +448,24 @@ centered_textures = true
 collision_mask = 0
 format = 1
 script = ExtResource( 1 )
-debug_mode = true
 
-[node name="Camera2D" type="Camera2D" parent="Navigation2D/Tiles"]
+[node name="Camera2D" type="Camera2D" parent="Tiles"]
 visible = false
 current = true
 
-[node name="RaycastsPathfinder" type="Node2D" parent="Navigation2D/Tiles"]
+[node name="RaycastsPathfinder" type="Node2D" parent="Tiles"]
 script = ExtResource( 9 )
 
-[node name="UnitPath" parent="Navigation2D/Tiles" instance=ExtResource( 3 )]
+[node name="PathDraw" parent="Tiles" instance=ExtResource( 3 )]
 cell_size = Vector2( 16, 16 )
 cell_tile_origin = 1
 centered_textures = true
 
-[node name="Line2D" type="Line2D" parent="Navigation2D/Tiles/UnitPath"]
+[node name="Line2D" type="Line2D" parent="Tiles/PathDraw"]
 width = 2.0
 
 [node name="UI" type="CanvasLayer" parent="."]
+script = ExtResource( 10 )
 
 [node name="HBox" type="HBoxContainer" parent="UI"]
 anchor_left = 0.5
@@ -507,10 +510,23 @@ popup_exclusive = true
 window_title = "Time's up!"
 script = ExtResource( 8 )
 
-[node name="Timer" type="Timer" parent="."]
-wait_time = 150.0
-one_shot = true
+[node name="LevelCompleteDialog" type="AcceptDialog" parent="UI"]
+visible = true
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -119.0
+margin_top = -58.0
+margin_right = 119.0
+margin_bottom = 58.0
+popup_exclusive = true
+window_title = "Good Job!"
+script = ExtResource( 6 )
 
+[connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
+[connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
+[connection signal="new_game" from="UI" to="." method="_on_UI_new_game"]
+[connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
 [connection signal="pressed" from="UI/HBox/Restart" to="." method="_on_Restart_pressed"]
 [connection signal="pressed" from="UI/HBox/Restart" to="UI/HBox/TimeLeft" method="_on_Restart_pressed"]
-[connection signal="confirmed" from="UI/GameOverDialog" to="." method="_on_GameOverDialog_confirmed"]

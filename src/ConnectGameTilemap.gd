@@ -5,11 +5,11 @@ const EMPTY_TILE = -1
 const DEFAULT_BOARD_SIZE = Vector2(14,8)
 const TILE = preload("Tile.tscn")
 
-export var debug_mode: = false
 export var board_size: = DEFAULT_BOARD_SIZE setget set_board_size
 export var draw_border: = true
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
+onready var path_draw_node = $PathDraw
 
 signal pair_cleared(pair)
 
@@ -62,20 +62,20 @@ func count_path_turns(path: PoolVector2Array) -> int:
 func find_path(from: Vector2, to: Vector2) -> PoolVector2Array:
 	var path: = PoolVector2Array([])
 	if get_cellv(from) == get_cellv(to):
-		var pathfinder = Pathfinder.new(self, get_cells_for_path(from, to))
-		#$RaycastsPathfinder.find_shortest_path(from, to)
-		#path = pathfinder.calculate_point_path(from, to)
 		path = $RaycastsPathfinder.find_shortest_path(from, to)
 	return path
 
 func draw_path(path: PoolVector2Array, time_on_screen: float = 1) -> void:
-	$UnitPath.draw(path)
+	path_draw_node.draw(path)
 # warning-ignore:return_value_discarded
 	get_tree().create_timer(time_on_screen).connect(
-		"timeout", $UnitPath, "stop")
+		"timeout", path_draw_node, "stop")
 	
 func as_index(cell: Vector2) -> int:
 	return int(cell.x + cell_size.x * cell.y)
+	
+func display_hint(pair: TilesPair) -> void:
+	pass
 
 func get_connectable_pairs() -> Array:
 	var connectables = []
@@ -138,7 +138,7 @@ func _draw() -> void:
 			false,
 			2
 		)
-	if debug_mode:
+	if get_parent().debug_mode:
 		draw_rect(
 			get_rect_world(), 
 			Color.white,
@@ -231,6 +231,9 @@ func get_mouse_cell() -> Vector2:
 func get_area2D_at(cell: Vector2) -> Area2D:
 	return _tiles_areas2D.get(cell)
 
+func check_win() -> bool:
+	return get_used_cells().empty()
+
 func _setup_colllision() -> void:
 	for node in get_tree().get_nodes_in_group("tile_areas"):
 		node.queue_free()
@@ -242,7 +245,7 @@ func _setup_colllision() -> void:
 			cell_size,
 			map_to_world(cell) + cell_size / 2)
 		_tiles_areas2D[cell] = new_tile_area
-		new_tile_area.visible = debug_mode
+		new_tile_area.visible = get_parent().debug_mode
 
 static func get_random_array_element(array: Array):
 	var copy = array.duplicate()
