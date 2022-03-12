@@ -433,7 +433,7 @@
 
 [node name="ConnectGame" type="Node2D"]
 script = ExtResource( 5 )
-time_limit = 100.0
+time_limit = 210.0
 
 [node name="Navigation2D" type="Navigation2D" parent="."]
 
@@ -445,6 +445,7 @@ centered_textures = true
 collision_mask = 0
 format = 1
 script = ExtResource( 1 )
+debug_mode = true
 
 [node name="Camera2D" type="Camera2D" parent="Navigation2D/Tiles"]
 visible = false

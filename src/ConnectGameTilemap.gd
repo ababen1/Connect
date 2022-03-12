@@ -5,8 +5,8 @@ const EMPTY_TILE = -1
 const DEFAULT_BOARD_SIZE = Vector2(14,8)
 const TILE = preload("Tile.tscn")
 
+export var debug_mode: = false
 export var board_size: = DEFAULT_BOARD_SIZE setget set_board_size
-export var debug_draw_padding: bool = true
 export var draw_border: = true
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
@@ -138,14 +138,13 @@ func _draw() -> void:
 			false,
 			2
 		)
-	if draw_border:
+	if debug_mode:
 		draw_rect(
-			get_used_rect_world(true), 
+			get_rect_world(), 
 			Color.white,
 			false,
 			2
 		)
-	if debug_draw_padding:
 		for y in board_size.y + 1:
 			for x in board_size.x + 1:
 				if is_border_cell(Vector2(x,y)):
@@ -172,7 +171,6 @@ func setup_board() -> void:
 	
 	_setup_colllision()
 		
-	
 	var free_cells: Array = get_free_cells(false)
 	while not free_cells.empty():
 		var cell1 = free_cells.pop_at(int(rand_range(0, free_cells.size() - 1)))
@@ -180,18 +178,13 @@ func setup_board() -> void:
 		var tile_id = get_random_tile()
 		set_cellv(cell1, tile_id)
 		set_cellv(cell2, tile_id)
-	$Camera2D.position = get_used_rect_world().position + get_used_rect_world().size / 2
+	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
 func get_rect() -> Rect2:
 	return Rect2(Vector2.ZERO, board_size)
-		
-func get_used_rect_world(include_padding: = false) -> Rect2:
-	var used_rect_position = map_to_world(get_used_rect().position)
-	var used_rect_size = cell_size * get_used_rect().size
-	if include_padding:
-		used_rect_position -= cell_size
-		used_rect_size += cell_size * 2
-	return Rect2(used_rect_position, used_rect_size)
+
+func get_rect_world() -> Rect2:
+	return Rect2(global_position, board_size * cell_size + cell_size)
 
 func is_border_cell(cords: Vector2) -> bool:
 	return (
@@ -249,6 +242,7 @@ func _setup_colllision() -> void:
 			cell_size,
 			map_to_world(cell) + cell_size / 2)
 		_tiles_areas2D[cell] = new_tile_area
+		new_tile_area.visible = debug_mode
 
 static func get_random_array_element(array: Array):
 	var copy = array.duplicate()
