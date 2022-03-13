@@ -59,3 +59,7 @@ func _on_UI_next_level() -> void:
 	self.current_level += 1
 	moves_taken = 0
 	start_new_game()
+
+
+func _on_Hint_pressed() -> void:
+	grid.display_hint()

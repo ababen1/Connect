@@ -7,8 +7,9 @@ func _enter_tree() -> void:
 	self.get_ok().text = "Play Again"
 
 func _ready() -> void:
-	get_close_button().disabled = true
-	get_close_button().hide()
+	if not owner.debug_mode:
+		get_close_button().disabled = true
+		get_close_button().hide()
 	connect("confirmed", self, "_on_confirm")
 	
 func display_results(results: Dictionary) -> void:

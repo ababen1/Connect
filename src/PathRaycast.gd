@@ -15,3 +15,12 @@ func get_casting_global_pos() -> Vector2:
 
 func get_length() -> float:
 	return global_position.distance_to(get_casting_global_pos())
+
+func as_line(color: = Color.white, width: = 2.0) -> Line2D:
+	var line = Line2D.new()
+	line.default_color = color
+	line.width = width
+	line.add_point(global_position)
+	line.add_point(get_casting_global_pos())
+	return line
+	

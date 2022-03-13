@@ -7,6 +7,7 @@ const TILE = preload("Tile.tscn")
 
 export var board_size: = DEFAULT_BOARD_SIZE setget set_board_size
 export var draw_border: = true
+export var clear_path_after: float = 0.3
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
 onready var path_draw_node = $PathDraw
@@ -43,7 +44,11 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 	self.board_size = board_size_
-	setup_board()
+	if not get_parent().debug_mode:
+		setup_board()
+	else:
+		setup_board_debug_mode()
+	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
 func count_path_turns(path: PoolVector2Array) -> int:
 	var turns = 0
@@ -65,7 +70,13 @@ func find_path(from: Vector2, to: Vector2) -> PoolVector2Array:
 		path = $RaycastsPathfinder.find_shortest_path(from, to)
 	return path
 
-func draw_path(path: PoolVector2Array, time_on_screen: float = 1) -> void:
+func draw_raycast(raycast: PathRaycast, time_on_screen: = clear_path_after) -> void:
+	var line = raycast.as_line()
+	add_child(line)
+# warning-ignore:return_value_discarded
+	get_tree().create_timer(time_on_screen, false).connect("timeout", line, "queue_free")
+
+func draw_path(path: PoolVector2Array, time_on_screen: float = clear_path_after) -> void:
 	path_draw_node.draw(path)
 # warning-ignore:return_value_discarded
 	get_tree().create_timer(time_on_screen).connect(
@@ -74,8 +85,11 @@ func draw_path(path: PoolVector2Array, time_on_screen: float = 1) -> void:
 func as_index(cell: Vector2) -> int:
 	return int(cell.x + cell_size.x * cell.y)
 	
-func display_hint(pair: TilesPair) -> void:
-	pass
+func display_hint() -> void:
+	path_draw_node.delete_line_path()
+	var pair = get_random_array_element(get_connectable_pairs())
+	var path = find_path(pair.tile1_cords, pair.tile2_cords)
+	path_draw_node.draw_line_path(path)
 
 func get_connectable_pairs() -> Array:
 	var connectables = []
@@ -104,8 +118,8 @@ func swap_pairs(pair1: TilesPair, pair2: TilesPair) -> void:
 func remove_pair(pair: TilesPair) -> void:
 	set_cellv(pair.tile1_cords, EMPTY_TILE)
 	set_cellv(pair.tile2_cords, EMPTY_TILE)
-	get_area2D_at(pair.tile1_cords).queue_free()
-	get_area2D_at(pair.tile2_cords).queue_free()
+	disable_cell_collision(pair.tile1_cords)
+	disable_cell_collision(pair.tile2_cords)
 	
 func get_all_pairs() -> Array:
 	var pairs: = []
@@ -156,9 +170,13 @@ func set_board_size(val: Vector2) -> void:
 	assert(int(val.x * val.y) % 2 == 0)
 	board_size = val + Vector2.ONE
 
+func setup_board_debug_mode() -> void:
+	for cell in get_used_cells():
+		_add_collision(cell)
+
 func setup_board() -> void:
-	clear()
-	
+	if not get_parent().debug_mode:
+		clear()
 	# setup outline
 	for x in board_size.x + 1:
 		set_cell(x, 0, EMPTY_TILE)
@@ -168,9 +186,10 @@ func setup_board() -> void:
 		set_cell(0, y, EMPTY_TILE)
 # warning-ignore:narrowing_conversion
 		set_cell(board_size.x, y, EMPTY_TILE)
-	
 	_setup_colllision()
-		
+	fill_board()
+
+func fill_board() -> void:
 	var free_cells: Array = get_free_cells(false)
 	while not free_cells.empty():
 		var cell1 = free_cells.pop_at(int(rand_range(0, free_cells.size() - 1)))
@@ -178,7 +197,6 @@ func setup_board() -> void:
 		var tile_id = get_random_tile()
 		set_cellv(cell1, tile_id)
 		set_cellv(cell2, tile_id)
-	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
 func get_rect() -> Rect2:
 	return Rect2(Vector2.ZERO, board_size)
@@ -231,21 +249,30 @@ func get_mouse_cell() -> Vector2:
 func get_area2D_at(cell: Vector2) -> Area2D:
 	return _tiles_areas2D.get(cell, null)
 
+func disable_cell_collision(cell: Vector2) -> void:
+	var collision_area: Area2D = get_area2D_at(cell)
+	collision_area.shape_owner_set_disabled(0, true)
+	collision_area.visible = false
+
 func check_win() -> bool:
 	return get_used_cells().empty()
 
+func _add_collision(cell: Vector2) -> void:
+	var new_tile_area = TILE.instance()
+	add_child(new_tile_area)
+	new_tile_area.add_to_group("tile_areas")
+	new_tile_area.setup(
+		cell_size,
+		map_to_world(cell) + cell_size / 2)
+	_tiles_areas2D[cell] = new_tile_area
+	new_tile_area.visible = get_parent().debug_mode
+
 func _setup_colllision() -> void:
+	_tiles_areas2D = {}
 	for node in get_tree().get_nodes_in_group("tile_areas"):
 		node.queue_free()
 	for cell in get_all_cells(false):
-		var new_tile_area = TILE.instance()
-		add_child(new_tile_area)
-		new_tile_area.add_to_group("tile_areas")
-		new_tile_area.setup(
-			cell_size,
-			map_to_world(cell) + cell_size / 2)
-		_tiles_areas2D[cell] = new_tile_area
-		new_tile_area.visible = get_parent().debug_mode
+		_add_collision(cell)
 
 static func get_random_array_element(array: Array):
 	var copy = array.duplicate()

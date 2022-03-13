@@ -54,11 +54,20 @@ func three_raycasts_to_path(
 	raycast_start: RayCast2D, 
 	raycast_end: RayCast2D, 
 	connecting_raycast: RayCast2D) -> PoolVector2Array:
-		var path: = raycast_to_cells(raycast_start)
-		if connecting_raycast:
-			path.append_array(raycast_to_cells(connecting_raycast))
-		path.append_array(raycast_to_cells(raycast_end))
-		return path
+		var path: = []
+		var first_collision_point = _get_collision_cell(raycast_start, connecting_raycast)
+		var second_collision_point = _get_collision_cell(raycast_end, connecting_raycast)
+		var start_raycast_cells: Array = raycast_to_cells(raycast_start)
+		var end_raycast_cells: Array = raycast_to_cells(raycast_end)
+		
+		path.append_array(start_raycast_cells.slice(0, start_raycast_cells.find(first_collision_point)))
+		path.append_array(raycast_to_cells(connecting_raycast))
+		end_raycast_cells.invert()
+		path.append_array(
+			end_raycast_cells.slice(
+				end_raycast_cells.find(second_collision_point), 
+				end_raycast_cells.size() - 1))
+		return path as PoolVector2Array
 
 func two_raycasts_to_path(start: PathRaycast, end: PathRaycast) -> PoolVector2Array:
 	var end_cells: Array = raycast_to_cells(end)
@@ -135,7 +144,8 @@ func _find_path_with_parallel_raycasts(
 				var connecting_raycast: = _create_raycast_between_cells(long_cell, short_cell)
 				if not connecting_raycast.is_colliding() and connecting_raycast.cast_to.normalized() in DIRECTIONS:
 					return three_raycasts_to_path(longer_raycast, shorter_raycast, connecting_raycast)
-		
+				else:
+					connecting_raycast.queue_free()
 		return PoolVector2Array([])
 
 func _create_raycast_between_cells(start: Vector2, end: Vector2) -> PathRaycast:
@@ -146,25 +156,6 @@ func _create_raycast_between_cells(start: Vector2, end: Vector2) -> PathRaycast:
 	new_raycast.cast_to = direction * distance
 	new_raycast.force_raycast_update()
 	return new_raycast
-
-# gets two parallel raycasts and tries to create a third raycast that connects them
-func get_connecting_raycast(
-	raycast_start: PathRaycast, 
-	raycast_end: PathRaycast) -> PathRaycast:
-		var connecting_raycast: PathRaycast = null
-		if raycast_start.get_casting_global_pos().direction_to(raycast_end.get_casting_global_pos()) in DIRECTIONS:
-			connecting_raycast = _create_raycast(
-				grid.world_to_map(raycast_start.get_casting_global_pos()))
-			connecting_raycast.cast_to = (
-				raycast_start.get_casting_global_pos().direction_to(
-				raycast_end.get_casting_global_pos())) * (
-				raycast_start.get_casting_global_pos().distance_to(
-				raycast_end.get_casting_global_pos()))
-			connecting_raycast.force_raycast_update()
-			if connecting_raycast.is_colliding():
-				connecting_raycast.queue_free()
-				connecting_raycast = null
-		return connecting_raycast
 
 func _can_extend_cast(raycast: PathRaycast, extend_by: Vector2) -> bool:
 	return grid.get_rect_world().has_point(raycast.get_casting_global_pos() + extend_by) and (

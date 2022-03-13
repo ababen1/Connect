@@ -1,4 +1,4 @@
-extends Node
+extends Resource
 class_name TilesPair
 
 var tile1_cords: Vector2

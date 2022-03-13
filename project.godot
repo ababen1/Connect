@@ -19,11 +19,6 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://src/PathRaycast.gd"
 }, {
-"base": "Resource",
-"class": "Pathfinder",
-"language": "GDScript",
-"path": "res://src/Pathfinder.gd"
-}, {
 "base": "Node2D",
 "class": "RaycastsPathfinder",
 "language": "GDScript",
@@ -34,7 +29,7 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://test.gd"
 }, {
-"base": "Node",
+"base": "Resource",
 "class": "TilesPair",
 "language": "GDScript",
 "path": "res://src/TilesPair.gd"
@@ -47,7 +42,6 @@ _global_script_classes=[ {
 _global_script_class_icons={
 "ConnectGameTilemap": "",
 "PathRaycast": "",
-"Pathfinder": "",
 "RaycastsPathfinder": "",
 "Test": "",
 "TilesPair": "",
