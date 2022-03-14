@@ -10,7 +10,6 @@ export var draw_border: = true
 export var clear_path_after: float = 0.3
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
-onready var path_draw_node = $PathDraw
 
 signal pair_cleared(pair)
 
@@ -50,46 +49,27 @@ func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 		setup_board_debug_mode()
 	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
-func count_path_turns(path: PoolVector2Array) -> int:
-	var turns = 0
-	var prev_point = null
-	var prev_direction: = Vector2.ZERO
-	for current_point in path:
-		assert(prev_point != current_point)
-		if prev_point:
-			var current_direction = prev_point.direction_to(current_point)
-			if current_direction != prev_direction: 
-				turns += 1
-			prev_direction = current_direction
-		prev_point = current_point
-	return turns
-
-func find_path(from: Vector2, to: Vector2) -> PoolVector2Array:
-	var path: = PoolVector2Array([])
+func find_path(from: Vector2, to: Vector2) -> Array:
+	var path: = []
 	if get_cellv(from) == get_cellv(to):
 		path = $RaycastsPathfinder.find_shortest_path(from, to)
 	return path
 
-func draw_raycast(raycast: PathRaycast, time_on_screen: = clear_path_after) -> void:
-	var line = raycast.as_line()
-	add_child(line)
+func draw_path(path: Array, time_on_screen: float = clear_path_after) -> void:
+	for raycast in path:
+		if raycast is PathRaycast:
+			var line = raycast.as_line()
+			add_child(line)
 # warning-ignore:return_value_discarded
-	get_tree().create_timer(time_on_screen, false).connect("timeout", line, "queue_free")
-
-func draw_path(path: PoolVector2Array, time_on_screen: float = clear_path_after) -> void:
-	path_draw_node.draw(path)
-# warning-ignore:return_value_discarded
-	get_tree().create_timer(time_on_screen).connect(
-		"timeout", path_draw_node, "stop")
+			get_tree().create_timer(time_on_screen).connect("timeout", line, "queue_free")
 	
 func as_index(cell: Vector2) -> int:
 	return int(cell.x + cell_size.x * cell.y)
 	
 func display_hint() -> void:
-	path_draw_node.delete_line_path()
-	var pair = get_random_array_element(get_connectable_pairs())
-	var path = find_path(pair.tile1_cords, pair.tile2_cords)
-	path_draw_node.draw_line_path(path)
+	var possible_paths = get_all_possible_paths().values()
+	var hint_path = get_random_array_element(possible_paths)
+	draw_path(hint_path, 3)
 
 func get_connectable_pairs() -> Array:
 	var connectables = []
@@ -120,6 +100,15 @@ func remove_pair(pair: TilesPair) -> void:
 	set_cellv(pair.tile2_cords, EMPTY_TILE)
 	disable_cell_collision(pair.tile1_cords)
 	disable_cell_collision(pair.tile2_cords)
+
+func get_all_possible_paths() -> Dictionary:
+	var paths: = {}
+	for pair in get_all_pairs():
+		if pair is TilesPair:
+			var possible_path = find_path(pair.tile1_cords, pair.tile2_cords)
+			if possible_path:
+				paths[pair] = possible_path
+	return paths
 	
 func get_all_pairs() -> Array:
 	var pairs: = []

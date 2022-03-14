@@ -1,8 +1,7 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://src/ConnectGameTilemap.gd" type="Script" id=1]
 [ext_resource path="res://assets/ConnectGameTileSet.tres" type="TileSet" id=2]
-[ext_resource path="res://src/UnitPath.tscn" type="PackedScene" id=3]
 [ext_resource path="res://src/UI/DebugLabels.gd" type="Script" id=4]
 [ext_resource path="res://src/ConnectGame.gd" type="Script" id=5]
 [ext_resource path="res://src/UI/LevelCompleteDialog.gd" type="Script" id=6]
@@ -26,9 +25,9 @@ cell_tile_origin = 1
 centered_textures = true
 collision_mask = 0
 format = 1
-tile_data = PoolIntArray( 131080, 1, 0, 131081, 0, 0, 196616, 1, 0, 196617, 1, 0, 262147, 0, 0, 393230, 1, 0 )
+tile_data = PoolIntArray( 131080, 1, 0, 131081, 0, 0, 196616, 1, 0, 196617, 1, 0, 262147, 0, 0, 327686, 1, 0 )
 script = ExtResource( 1 )
-clear_path_after = 1.3
+clear_path_after = 1.4
 
 [node name="Camera2D" type="Camera2D" parent="Tiles"]
 visible = false
@@ -36,14 +35,6 @@ current = true
 
 [node name="RaycastsPathfinder" type="Node2D" parent="Tiles"]
 script = ExtResource( 9 )
-
-[node name="PathDraw" parent="Tiles" instance=ExtResource( 3 )]
-cell_size = Vector2( 16, 16 )
-cell_tile_origin = 1
-centered_textures = true
-
-[node name="Line2D" type="Line2D" parent="Tiles/PathDraw"]
-width = 2.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 script = ExtResource( 10 )
@@ -117,6 +108,7 @@ script = ExtResource( 6 )
 
 [connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
 [connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
+[connection signal="pair_cleared" from="Tiles" to="." method="_on_Tiles_pair_cleared"]
 [connection signal="new_game" from="UI" to="." method="_on_UI_new_game"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="." method="_on_Restart_pressed"]

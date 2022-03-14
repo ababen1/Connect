@@ -22,9 +22,9 @@ func is_raycast_within_board(raycast: PathRaycast) -> bool:
 	var board: Rect2 = grid.get_rect_world()
 	return board.has_point(raycast.global_position.abs()) and board.has_point(raycast.get_casting_global_pos().abs())
 
-func find_direct_path(
+func _find_direct_path(
 	raycast_start: PathRaycast, 
-	raycast_end: PathRaycast) -> PoolVector2Array:
+	raycast_end: PathRaycast) -> Array:
 		var direction = raycast_start.global_position.direction_to(
 			raycast_end.global_position)
 		if direction in DIRECTIONS:
@@ -32,8 +32,8 @@ func find_direct_path(
 				raycast_end.global_position)
 			raycast_start.force_raycast_update()
 			if not raycast_start.is_colliding():
-				return raycast_to_cells(raycast_start)
-		return PoolVector2Array([])
+				return [raycast_start]
+		return []
 		
 
 # Gets a raycast and returns all the cells it passes through
@@ -50,43 +50,7 @@ func raycast_to_cells(raycast: PathRaycast) -> PoolVector2Array:
 	cells.append(end_point)
 	return cells
 
-func three_raycasts_to_path(
-	raycast_start: RayCast2D, 
-	raycast_end: RayCast2D, 
-	connecting_raycast: RayCast2D) -> PoolVector2Array:
-		var path: = []
-		var first_collision_point = _get_collision_cell(raycast_start, connecting_raycast)
-		var second_collision_point = _get_collision_cell(raycast_end, connecting_raycast)
-		var start_raycast_cells: Array = raycast_to_cells(raycast_start)
-		var end_raycast_cells: Array = raycast_to_cells(raycast_end)
-		
-		path.append_array(start_raycast_cells.slice(0, start_raycast_cells.find(first_collision_point)))
-		path.append_array(raycast_to_cells(connecting_raycast))
-		end_raycast_cells.invert()
-		path.append_array(
-			end_raycast_cells.slice(
-				end_raycast_cells.find(second_collision_point), 
-				end_raycast_cells.size() - 1))
-		return path as PoolVector2Array
-
-func two_raycasts_to_path(start: PathRaycast, end: PathRaycast) -> PoolVector2Array:
-	var end_cells: Array = raycast_to_cells(end)
-	end_cells.invert()
-	var start_cells: Array = raycast_to_cells(start)
-	var common_cell = _get_collision_cell(start, end)
-	var path: Array = []
-	var current_cell: Vector2
-	while current_cell != common_cell:
-		current_cell = start_cells.pop_front()
-		path.append(current_cell)
-	end_cells = end_cells.slice(
-		end_cells.find(common_cell), 
-		end_cells.find(grid.world_to_map(end.global_position)))
-	path.append_array(end_cells)
-	
-	return path as PoolVector2Array
-
-func clear_raycasts() -> void:
+func _clear_raycasts() -> void:
 	for child in get_children():
 		if child is PathRaycast:
 			child.queue_free()
@@ -98,14 +62,15 @@ static func are_parallel(vector1: Vector2, vector2: Vector2) -> bool:
 static func are_perpendicular(vector1: Vector2, vector2: Vector2) -> bool:
 	return int(vector1.dot(vector2)) == 0
 
-func find_shortest_path(start: Vector2, end: Vector2) -> PoolVector2Array:
-	clear_raycasts()
+func find_shortest_path(start: Vector2, end: Vector2) -> Array:
+	_clear_raycasts()
 	var raycast_start: = _create_raycast(start)
 	var raycast_end: = _create_raycast(end)
+	var possible_paths: Array = []
 	raycast_start.add_exception(grid.get_area2D_at(end))
 	raycast_end.add_exception(grid.get_area2D_at(start))
 	
-	var direct_path = find_direct_path(raycast_start, raycast_end)
+	var direct_path = _find_direct_path(raycast_start, raycast_end)
 	if direct_path:
 		return direct_path
 	
@@ -123,11 +88,11 @@ func find_shortest_path(start: Vector2, end: Vector2) -> PoolVector2Array:
 				var path = _find_path_with_perpendicular_raycasts(
 					raycast_start, raycast_end)
 				if path: return path
-	return PoolVector2Array([])				
+	return []			
 					
 func _find_path_with_parallel_raycasts(
 	raycast_start: PathRaycast, 
-	raycast_end: PathRaycast) -> PoolVector2Array:
+	raycast_end: PathRaycast) -> Array:
 		var start_direction = raycast_start.cast_to.normalized()
 		var end_direction = raycast_end.cast_to.normalized()
 		
@@ -143,10 +108,10 @@ func _find_path_with_parallel_raycasts(
 			for short_cell in shorter_raycast_cells:
 				var connecting_raycast: = _create_raycast_between_cells(long_cell, short_cell)
 				if not connecting_raycast.is_colliding() and connecting_raycast.cast_to.normalized() in DIRECTIONS:
-					return three_raycasts_to_path(longer_raycast, shorter_raycast, connecting_raycast)
+					return [longer_raycast, shorter_raycast, connecting_raycast]
 				else:
 					connecting_raycast.queue_free()
-		return PoolVector2Array([])
+		return []
 
 func _create_raycast_between_cells(start: Vector2, end: Vector2) -> PathRaycast:
 	var new_raycast = _create_raycast(start)
@@ -177,8 +142,8 @@ func _get_collision_cell(raycast1: PathRaycast, raycast2: PathRaycast) -> Vector
 	
 	
 func _find_path_with_perpendicular_raycasts(
-	raycast_start: PathRaycast, raycast_end: PathRaycast) -> PoolVector2Array:
-		var path: = PoolVector2Array([])
+	raycast_start: PathRaycast, raycast_end: PathRaycast) -> Array:
+		var path: = []
 		var start_direction = raycast_start.cast_to.normalized()
 		var end_direction = raycast_end.cast_to.normalized()
 		while _can_extend_cast(raycast_start, start_direction * grid.cell_size) or (
@@ -188,7 +153,7 @@ func _find_path_with_perpendicular_raycasts(
 		if not raycast_start.is_colliding() and not raycast_end.is_colliding():
 			var collision_point = _get_collision_cell(raycast_start, raycast_end)
 			if collision_point:
-				path = two_raycasts_to_path(raycast_start, raycast_end)
+				path = [raycast_start, raycast_end]
 		return path
 			
 				

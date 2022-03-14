@@ -63,3 +63,7 @@ func _on_UI_next_level() -> void:
 
 func _on_Hint_pressed() -> void:
 	grid.display_hint()
+
+func _on_Tiles_pair_cleared(pair) -> void:
+	if grid.get_all_possible_paths().empty():
+		grid.shuffle_board()

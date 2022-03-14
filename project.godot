@@ -33,19 +33,13 @@ _global_script_classes=[ {
 "class": "TilesPair",
 "language": "GDScript",
 "path": "res://src/TilesPair.gd"
-}, {
-"base": "TileMap",
-"class": "UnitPath",
-"language": "GDScript",
-"path": "res://src/UnitPath.gd"
 } ]
 _global_script_class_icons={
 "ConnectGameTilemap": "",
 "PathRaycast": "",
 "RaycastsPathfinder": "",
 "Test": "",
-"TilesPair": "",
-"UnitPath": ""
+"TilesPair": ""
 }
 
 [application]
