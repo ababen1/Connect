@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/UIpackSheet_transparent.png-2fdf572ee9fb85b5a2640f0b522781f4.stex"
+path="res://.import/UIpackSheet_transparent.png-ed259575ba51ae6cca79e76faad93171.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/UIpackSheet_transparent.png"
-dest_files=[ "res://.import/UIpackSheet_transparent.png-2fdf572ee9fb85b5a2640f0b522781f4.stex" ]
+source_file="res://assets/ui/UIpackSheet_transparent.png"
+dest_files=[ "res://.import/UIpackSheet_transparent.png-ed259575ba51ae6cca79e76faad93171.stex" ]
 
 [params]
 
