@@ -32,7 +32,7 @@ func _find_direct_path(
 				raycast_end.global_position)
 			raycast_start.force_raycast_update()
 			if not raycast_start.is_colliding():
-				return [raycast_start]
+				return [raycast_start.duplicate()]
 		return []
 		
 
@@ -62,17 +62,50 @@ static func are_parallel(vector1: Vector2, vector2: Vector2) -> bool:
 static func are_perpendicular(vector1: Vector2, vector2: Vector2) -> bool:
 	return int(vector1.dot(vector2)) == 0
 
+func get_path_length(path: Array) -> float:
+	var length_sum: = 0.0
+	for raycast in path:
+		if raycast is PathRaycast:
+			length_sum += raycast.get_length()
+	return length_sum
+
 func find_shortest_path(start: Vector2, end: Vector2) -> Array:
 	_clear_raycasts()
+	var possible_paths: Array = _find_possible_paths(start, end)
+	var shortest_path: Array 
+	if possible_paths:
+		shortest_path = possible_paths.front()
+		for path in possible_paths:
+			if get_path_length(path) < get_path_length(shortest_path):
+				shortest_path = path
+	return shortest_path
+	
+func two_raycasts_to_line(raycast1: PathRaycast, raycast2: PathRaycast) -> Line2D:
+	var line: = PathRaycast.create_line()
+	line.add_point(raycast1.global_position)
+	line.add_point(grid.map_to_world(_get_collision_cell(raycast1, raycast2)) + grid.cell_size / 2)
+	line.add_point(raycast2.global_position)
+	return line
+
+func three_raycasts_to_line(raycast1: PathRaycast, raycast2: PathRaycast, connecting_raycast: PathRaycast) -> Line2D:
+	var line: = PathRaycast.create_line()
+	line.add_point(raycast1.global_position)
+	line.add_point(connecting_raycast.global_position)
+	line.add_point(connecting_raycast.get_casting_global_pos())
+	line.add_point(raycast2.global_position)
+	return line
+
+func _find_possible_paths(start: Vector2, end: Vector2) -> Array:
 	var raycast_start: = _create_raycast(start)
 	var raycast_end: = _create_raycast(end)
 	var possible_paths: Array = []
 	raycast_start.add_exception(grid.get_area2D_at(end))
 	raycast_end.add_exception(grid.get_area2D_at(start))
 	
-	var direct_path = _find_direct_path(raycast_start, raycast_end)
+	var direct_path: Array = _find_direct_path(raycast_start, raycast_end)
 	if direct_path:
-		return direct_path
+		possible_paths.append(direct_path)
+		return possible_paths
 	
 	for direction_start in DIRECTIONS:
 		for direction_end in DIRECTIONS:
@@ -80,15 +113,16 @@ func find_shortest_path(start: Vector2, end: Vector2) -> Array:
 			raycast_end.cast_to = direction_end * grid.cell_size
 			raycast_start.force_raycast_update()
 			raycast_end.force_raycast_update()
+			var current_path = []
 			if are_parallel(direction_start, direction_end):
-				var path = _find_path_with_parallel_raycasts(
+				current_path = _find_path_with_parallel_raycasts(
 					raycast_start, raycast_end)
-				if path: return path
 			elif are_perpendicular(direction_start, direction_end):
-				var path = _find_path_with_perpendicular_raycasts(
+				current_path = _find_path_with_perpendicular_raycasts(
 					raycast_start, raycast_end)
-				if path: return path
-	return []			
+			if current_path: 
+				possible_paths.append(current_path)
+	return possible_paths		
 					
 func _find_path_with_parallel_raycasts(
 	raycast_start: PathRaycast, 
@@ -108,7 +142,7 @@ func _find_path_with_parallel_raycasts(
 			for short_cell in shorter_raycast_cells:
 				var connecting_raycast: = _create_raycast_between_cells(long_cell, short_cell)
 				if not connecting_raycast.is_colliding() and connecting_raycast.cast_to.normalized() in DIRECTIONS:
-					return [longer_raycast, shorter_raycast, connecting_raycast]
+					return [longer_raycast.duplicate(), shorter_raycast.duplicate(), connecting_raycast.duplicate()]
 				else:
 					connecting_raycast.queue_free()
 		return []
@@ -153,7 +187,7 @@ func _find_path_with_perpendicular_raycasts(
 		if not raycast_start.is_colliding() and not raycast_end.is_colliding():
 			var collision_point = _get_collision_cell(raycast_start, raycast_end)
 			if collision_point:
-				path = [raycast_start, raycast_end]
+				path = [raycast_start.duplicate(), raycast_end.duplicate()]
 		return path
 			
 				

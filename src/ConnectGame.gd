@@ -20,6 +20,10 @@ func _ready() -> void:
 # warning-ignore:return_value_discarded
 	timer.connect("timeout", self, "_on_timeout")
 	$Tiles/RaycastsPathfinder.visible = debug_mode
+
+func _unhandled_input(event: InputEvent) -> void:
+	if debug_mode and event.is_action_pressed("ui_down"):
+		grid.shuffle_board()
 	
 func start_new_game() -> void:
 	timer.stop()

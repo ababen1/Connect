@@ -10,6 +10,7 @@ export var draw_border: = true
 export var clear_path_after: float = 0.3
 
 onready var debug_labels = owner.get_node("UI/DebugLabels")
+onready var pathfinder = $RaycastsPathfinder
 
 signal pair_cleared(pair)
 
@@ -52,16 +53,25 @@ func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 func find_path(from: Vector2, to: Vector2) -> Array:
 	var path: = []
 	if get_cellv(from) == get_cellv(to):
-		path = $RaycastsPathfinder.find_shortest_path(from, to)
+		path = pathfinder.find_shortest_path(from, to)
 	return path
 
 func draw_path(path: Array, time_on_screen: float = clear_path_after) -> void:
-	for raycast in path:
-		if raycast is PathRaycast:
-			var line = raycast.as_line()
-			add_child(line)
+	var line: = raycasts_to_line(path)
+	add_child(line)
 # warning-ignore:return_value_discarded
-			get_tree().create_timer(time_on_screen).connect("timeout", line, "queue_free")
+	get_tree().create_timer(time_on_screen).connect("timeout", line, "queue_free")
+
+func raycasts_to_line(raycasts: Array) -> Line2D:
+	var line: = PathRaycast.create_line()
+	match raycasts.size():
+		1:
+			line = raycasts[0].as_line()
+		2:
+			line = pathfinder.two_raycasts_to_line(raycasts[0], raycasts[1])
+		3:
+			line = pathfinder.three_raycasts_to_line(raycasts[0], raycasts[1], raycasts[2])
+	return line	
 	
 func as_index(cell: Vector2) -> int:
 	return int(cell.x + cell_size.x * cell.y)
@@ -119,7 +129,6 @@ func get_all_pairs() -> Array:
 func get_all_pairs_of(tile_id: int) -> Array:
 	var cells: Array = get_used_cells_by_id(tile_id)
 	var pairs: Array = []
-	assert(cells.size() % 2 == 0)
 	for idx in cells.size() - 2:
 		var new_pair = TilesPair.new(cells[idx], cells[idx + 1])
 		assert(get_cellv(new_pair.tile1_cords) == get_cellv(new_pair.tile2_cords))

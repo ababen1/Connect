@@ -25,7 +25,7 @@ cell_tile_origin = 1
 centered_textures = true
 collision_mask = 0
 format = 1
-tile_data = PoolIntArray( 131080, 1, 0, 131081, 0, 0, 196616, 1, 0, 196617, 1, 0, 262147, 0, 0, 327686, 1, 0 )
+tile_data = PoolIntArray( 65543, 4, 0, 131077, 8, 0, 131080, 1, 0, 131081, 0, 0, 196613, 3, 0, 196615, 8, 0, 196616, 1, 0, 196618, 3, 0, 262147, 0, 0, 327686, 4, 0 )
 script = ExtResource( 1 )
 clear_path_after = 1.4
 
