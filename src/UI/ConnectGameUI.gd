@@ -17,4 +17,6 @@ func _on_ConnectGame_game_over(stats) -> void:
 
 func _on_ConnectGame_level_completed(level_num) -> void:
 	level_completed_dialog.display(level_num)
+	yield(level_completed_dialog, "next_level")
+	emit_signal("next_level")
 	

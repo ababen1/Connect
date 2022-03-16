@@ -9,6 +9,7 @@ func _enter_tree() -> void:
 	get_ok().text = "Next level"
 
 func _ready() -> void:
+# warning-ignore:return_value_discarded
 	connect("confirmed", self, "_on_confirm")
 
 func display(level_num: int) -> void:

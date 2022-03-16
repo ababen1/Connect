@@ -26,3 +26,7 @@ func get_timer() -> Timer:
 		
 func _on_Restart_pressed() -> void:
 	set_time_left(_timer.wait_time)
+
+
+func _on_ConnectGame_time_limit_changed(new_time) -> void:
+	set_time_left(new_time)

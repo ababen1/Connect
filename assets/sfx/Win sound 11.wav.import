@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/Win sound 11.wav-cab8bfb42568c1ccf20c04d81b6c5e7a.sample"
+
+[deps]
+
+source_file="res://assets/sfx/Win sound 11.wav"
+dest_files=[ "res://.import/Win sound 11.wav-cab8bfb42568c1ccf20c04d81b6c5e7a.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

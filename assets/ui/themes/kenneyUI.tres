@@ -107,6 +107,20 @@ margin_right = 13.3469
 margin_top = 13.3469
 margin_bottom = 11.2935
 
+[sub_resource type="StyleBoxTexture" id=30]
+content_margin_left = 10.0
+content_margin_right = 10.0
+content_margin_top = 10.0
+content_margin_bottom = 10.0
+texture = ExtResource( 2 )
+region_rect = Rect2( 321, 440, 49, 49 )
+margin_left = 7.94429
+margin_right = 8.73872
+margin_top = 9.53314
+margin_bottom = 13.9025
+expand_margin_top = 10.0
+expand_margin_bottom = 10.0
+
 [sub_resource type="AtlasTexture" id=20]
 flags = 4
 atlas = ExtResource( 2 )
@@ -139,20 +153,6 @@ margin_right = 8.73872
 margin_top = 9.53314
 margin_bottom = 13.9025
 
-[sub_resource type="StyleBoxTexture" id=30]
-content_margin_left = 10.0
-content_margin_right = 10.0
-content_margin_top = 10.0
-content_margin_bottom = 10.0
-texture = ExtResource( 2 )
-region_rect = Rect2( 321, 440, 49, 49 )
-margin_left = 7.94429
-margin_right = 8.73872
-margin_top = 9.53314
-margin_bottom = 13.9025
-expand_margin_top = 10.0
-expand_margin_bottom = 10.0
-
 [sub_resource type="StyleBoxTexture" id=22]
 content_margin_left = 12.0
 content_margin_top = 10.0
@@ -182,7 +182,8 @@ font_data = ExtResource( 1 )
 default_font = SubResource( 23 )
 Button/colors/font_color = Color( 0, 0, 0, 1 )
 Button/colors/font_color_disabled = Color( 0.9, 0.9, 0.9, 0.2 )
-Button/colors/font_color_hover = Color( 0.34902, 0.34902, 0.34902, 1 )
+Button/colors/font_color_focus = Color( 0, 0, 0, 1 )
+Button/colors/font_color_hover = Color( 0, 0, 0, 1 )
 Button/colors/font_color_pressed = Color( 0.388235, 0.388235, 0.388235, 1 )
 Button/constants/hseparation = 2
 Button/fonts/font = null
@@ -261,6 +262,7 @@ OptionButton/styles/hover = null
 OptionButton/styles/normal = null
 OptionButton/styles/pressed = null
 Panel/styles/panel = SubResource( 19 )
+PopupDialog/styles/panel = SubResource( 30 )
 PopupMenu/colors/font_color = Color( 0, 0, 0, 1 )
 PopupMenu/colors/font_color_accel = Color( 0.701961, 0.701961, 0.701961, 0.8 )
 PopupMenu/colors/font_color_disabled = Color( 0.4, 0.4, 0.4, 0.8 )
@@ -279,6 +281,7 @@ PopupMenu/styles/labeled_separator_right = null
 PopupMenu/styles/panel = SubResource( 30 )
 PopupMenu/styles/panel_disabled = null
 PopupMenu/styles/separator = null
+PopupPanel/styles/panel = SubResource( 30 )
 TextEdit/colors/background_color = Color( 0, 0, 0, 0 )
 TextEdit/colors/bookmark_color = Color( 0.08, 0.49, 0.98, 1 )
 TextEdit/colors/brace_mismatch_color = Color( 1, 0.2, 0.2, 1 )

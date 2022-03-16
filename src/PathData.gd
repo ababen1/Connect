@@ -12,8 +12,8 @@ var start_cast: PoolVector2Array
 var end_cast: PoolVector2Array
 var connecting_cast: PoolVector2Array
 
-func _init(start: PathRaycast, end: PathRaycast = null, connecting: PathRaycast = null) -> void:
-	start_cast = PoolVector2Array([start.global_position, start.get_casting_global_pos()])
+func _init(start: PathRaycast = null, end: PathRaycast = null, connecting: PathRaycast = null) -> void:
+	start_cast = PoolVector2Array([start.global_position, start.get_casting_global_pos()]) if start else PoolVector2Array([])
 	end_cast = PoolVector2Array([end.global_position, end.get_casting_global_pos()]) if end else PoolVector2Array([])
 	connecting_cast = PoolVector2Array([connecting.global_position, connecting.get_casting_global_pos()]) if connecting else PoolVector2Array([])
 
@@ -54,7 +54,7 @@ func _make_path_with_three_casts() -> PoolVector2Array:
 		start_cast[0], 
 		connecting_cast[0], 
 		connecting_cast[1], 
-		end_cast[1]])
+		end_cast[0]])
 
 static func get_intersection_point(
 	line1: PoolVector2Array, 

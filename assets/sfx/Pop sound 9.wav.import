@@ -1,0 +1,21 @@
+[remap]
+
+importer="wav"
+type="AudioStreamSample"
+path="res://.import/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample"
+
+[deps]
+
+source_file="res://assets/sfx/Pop sound 9.wav"
+dest_files=[ "res://.import/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample" ]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop=false
+compress/mode=0

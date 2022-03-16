@@ -1,7 +1,8 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://src/ConnectGameTilemap.gd" type="Script" id=1]
 [ext_resource path="res://assets/ConnectGameTileSet.tres" type="TileSet" id=2]
+[ext_resource path="res://src/HintLine.gd" type="Script" id=3]
 [ext_resource path="res://src/UI/DebugLabels.gd" type="Script" id=4]
 [ext_resource path="res://src/ConnectGame.gd" type="Script" id=5]
 [ext_resource path="res://src/UI/LevelCompleteDialog.gd" type="Script" id=6]
@@ -9,13 +10,18 @@
 [ext_resource path="res://src/UI/GameOverDialog.gd" type="Script" id=8]
 [ext_resource path="res://src/RaycastsPathfinder.gd" type="Script" id=9]
 [ext_resource path="res://src/UI/ConnectGameUI.gd" type="Script" id=10]
+[ext_resource path="res://src/UI/Pause.gd" type="Script" id=11]
+
+[sub_resource type="StyleBoxFlat" id=1]
+bg_color = Color( 0.219608, 0.219608, 0.219608, 1 )
 
 [node name="ConnectGame" type="Node2D"]
+pause_mode = 2
 z_index = -2
 script = ExtResource( 5 )
-debug_mode = true
 
 [node name="Timer" type="Timer" parent="."]
+pause_mode = 1
 wait_time = 150.0
 one_shot = true
 
@@ -26,13 +32,19 @@ cell_tile_origin = 1
 centered_textures = true
 collision_mask = 0
 format = 1
-tile_data = PoolIntArray( 65543, 4, 0, 131077, 8, 0, 131080, 1, 0, 131081, 0, 0, 196613, 3, 0, 196615, 8, 0, 196616, 1, 0, 196618, 3, 0, 262147, 0, 0, 327686, 4, 0 )
+tile_data = PoolIntArray( 65537, 6, 0, 65538, 15, 0, 65539, 12, 0, 65540, 18, 0, 131073, 23, 0, 131074, 12, 0, 131075, 2, 0, 131076, 23, 0, 196609, 15, 0, 196610, 18, 0, 196611, 6, 0, 196612, 2, 0 )
 script = ExtResource( 1 )
-clear_path_after = 1.4
+board_size = Vector2( 14, 8 )
+clear_path_after = 0.5
 
 [node name="Camera2D" type="Camera2D" parent="Tiles"]
 visible = false
 current = true
+
+[node name="Hint" type="Line2D" parent="Tiles"]
+width = 2.0
+default_color = Color( 0.815686, 0.792157, 0.792157, 1 )
+script = ExtResource( 3 )
 
 [node name="RaycastsPathfinder" type="Node2D" parent="Tiles"]
 script = ExtResource( 9 )
@@ -49,19 +61,19 @@ margin_bottom = 64.0
 alignment = 2
 
 [node name="Restart" type="Button" parent="UI/Buttons"]
-margin_left = 408.0
-margin_top = 22.0
-margin_right = 465.0
-margin_bottom = 42.0
+margin_left = 327.0
+margin_top = 10.0
+margin_right = 439.324
+margin_bottom = 52.251
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Restart"
 
 [node name="Hint" type="Button" parent="UI/Buttons"]
-margin_left = 469.0
-margin_top = 22.0
-margin_right = 508.0
-margin_bottom = 42.0
+margin_left = 443.0
+margin_top = 10.0
+margin_right = 508.324
+margin_bottom = 52.251
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Hint"
@@ -95,6 +107,7 @@ window_title = "Time's up!"
 script = ExtResource( 8 )
 
 [node name="LevelCompleteDialog" type="AcceptDialog" parent="UI"]
+visible = true
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -102,16 +115,66 @@ anchor_bottom = 0.5
 margin_left = -119.0
 margin_top = -58.0
 margin_right = 119.0
-margin_bottom = 58.0
+margin_bottom = 86.0
 popup_exclusive = true
 window_title = "Good Job!"
 script = ExtResource( 6 )
 
+[node name="Pause" type="Panel" parent="UI"]
+pause_mode = 2
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 8.0
+margin_top = 10.0
+margin_right = -8.0
+margin_bottom = -10.0
+custom_styles/panel = SubResource( 1 )
+script = ExtResource( 11 )
+
+[node name="CenterContainer" type="VBoxContainer" parent="UI/Pause"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+custom_constants/separation = 27
+alignment = 1
+
+[node name="Label" type="Label" parent="UI/Pause/CenterContainer"]
+margin_top = 96.0
+margin_right = 496.0
+margin_bottom = 114.0
+text = "PAUSED"
+align = 1
+
+[node name="Button" type="Button" parent="UI/Pause/CenterContainer"]
+margin_left = 196.0
+margin_top = 141.0
+margin_right = 299.324
+margin_bottom = 183.251
+size_flags_horizontal = 6
+text = "resume"
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+layer = -99
+
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color( 1, 1, 1, 0.133333 )
+__meta__ = {
+"_edit_lock_": true
+}
+
 [connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
 [connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
-[connection signal="pair_cleared" from="Tiles" to="." method="_on_Tiles_pair_cleared"]
+[connection signal="time_limit_changed" from="." to="UI/TimeLeft" method="_on_ConnectGame_time_limit_changed"]
+[connection signal="pair_cleared" from="Tiles" to="Tiles/Hint" method="_on_Tiles_pair_cleared"]
 [connection signal="new_game" from="UI" to="." method="_on_UI_new_game"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="." method="_on_Restart_pressed"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="UI/TimeLeft" method="_on_Restart_pressed"]
 [connection signal="pressed" from="UI/Buttons/Hint" to="." method="_on_Hint_pressed"]
+[connection signal="pressed" from="UI/Pause/CenterContainer/Button" to="UI/Pause" method="_on_Button_pressed"]

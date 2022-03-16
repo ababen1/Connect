@@ -10,6 +10,7 @@ func _ready() -> void:
 	if not owner.debug_mode:
 		get_close_button().disabled = true
 		get_close_button().hide()
+# warning-ignore:return_value_discarded
 	connect("confirmed", self, "_on_confirm")
 	
 func display_results(results: Dictionary) -> void:

@@ -2,7 +2,7 @@ extends TileMap
 class_name ConnectGameTilemap
 
 const EMPTY_TILE = -1
-const DEFAULT_BOARD_SIZE = Vector2(14,8)
+const DEFAULT_BOARD_SIZE = Vector2(3,3)
 const TILE = preload("Tile.tscn")
 
 export var board_size: = DEFAULT_BOARD_SIZE setget set_board_size
@@ -18,7 +18,7 @@ var selected_cell
 var _tiles_areas2D: Dictionary = {}
 
 func _ready() -> void:
-	start_new_game(self.board_size)
+	pass
 
 func _process(_delta: float) -> void:
 	update()
@@ -34,9 +34,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				elif selected_cell == cell_clicked:
 					selected_cell = null
 				else:
-					var path: = find_path(selected_cell, cell_clicked)
-					if not path.empty():
-						draw_path(path)
+					var path: PathData = find_path(selected_cell, cell_clicked)
+					if path:
+# warning-ignore:return_value_discarded
+						draw_path(path.get_line_path())
 						var pair = TilesPair.new(selected_cell, cell_clicked)
 						remove_pair(pair)
 						emit_signal("pair_cleared", pair)
@@ -48,38 +49,32 @@ func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 		setup_board()
 	else:
 		setup_board_debug_mode()
+	$Hint.remove_hint()
 	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
-func find_path(from: Vector2, to: Vector2) -> Array:
-	var path: = []
+func find_path(from: Vector2, to: Vector2) -> PathData:
+	var path: PathData
 	if get_cellv(from) == get_cellv(to):
 		path = pathfinder.find_shortest_path(from, to)
 	return path
 
-func draw_path(path: Array, time_on_screen: float = clear_path_after) -> void:
-	var line: = raycasts_to_line(path)
-	add_child(line)
-# warning-ignore:return_value_discarded
-	get_tree().create_timer(time_on_screen).connect("timeout", line, "queue_free")
-
-func raycasts_to_line(raycasts: Array) -> Line2D:
+func draw_path(points: PoolVector2Array, time_on_screen: float = clear_path_after) -> void:
 	var line: = PathRaycast.create_line()
-	match raycasts.size():
-		1:
-			line = raycasts[0].as_line()
-		2:
-			line = pathfinder.two_raycasts_to_line(raycasts[0], raycasts[1])
-		3:
-			line = pathfinder.three_raycasts_to_line(raycasts[0], raycasts[1], raycasts[2])
-	return line	
+	for point in points:
+		line.add_point(point)
+	add_child(line)
+	if sign(time_on_screen) == 1:	
+	# warning-ignore:return_value_discarded
+		get_tree().create_timer(time_on_screen).connect("timeout", line, "queue_free")
 	
 func as_index(cell: Vector2) -> int:
 	return int(cell.x + cell_size.x * cell.y)
 	
 func display_hint() -> void:
 	var possible_paths = get_all_possible_paths().values()
-	var hint_path = get_random_array_element(possible_paths)
-	draw_path(hint_path, 3)
+	var hint_path: PathData = get_random_array_element(possible_paths)
+	$Hint.show_hint(hint_path)
+	
 
 func get_connectable_pairs() -> Array:
 	var connectables = []
@@ -89,13 +84,16 @@ func get_connectable_pairs() -> Array:
 	return connectables
 
 func shuffle_board() -> void:
-	var all_pairs: Array = get_all_pairs()
-	while not all_pairs.empty():
-		var pair1: TilesPair = all_pairs.pop_at(
-			int(rand_range(0, all_pairs.size() - 1)))
-		var pair2: TilesPair = all_pairs.pop_at(
-			int(rand_range(0, all_pairs.size() - 1)))
-		swap_pairs(pair1, pair2)
+	var all_cells = get_used_cells()
+	while not all_cells.empty():
+		var cell1 = all_cells.pop_front()
+		all_cells.shuffle()
+		var cell1_tile = get_cellv(cell1)
+		var cell2 = all_cells.pop_front()
+		all_cells.shuffle()
+		var cell2_tile = get_cellv(cell2)
+		set_cellv(cell1, cell2_tile)
+		set_cellv(cell2, cell1_tile)
 		
 func swap_pairs(pair1: TilesPair, pair2: TilesPair) -> void:
 	var pair1_tile_id = get_cellv(pair1.tile1_cords)
@@ -119,6 +117,14 @@ func get_all_possible_paths() -> Dictionary:
 			if possible_path:
 				paths[pair] = possible_path
 	return paths
+
+func has_possible_paths() -> bool:
+	for pair in get_all_pairs():
+		if pair is TilesPair:
+			var possible_path = find_path(pair.tile1_cords, pair.tile2_cords)
+			if possible_path:
+				return true
+	return false
 	
 func get_all_pairs() -> Array:
 	var pairs: = []
@@ -129,7 +135,7 @@ func get_all_pairs() -> Array:
 func get_all_pairs_of(tile_id: int) -> Array:
 	var cells: Array = get_used_cells_by_id(tile_id)
 	var pairs: Array = []
-	for idx in cells.size() - 2:
+	for idx in cells.size() - 1:
 		var new_pair = TilesPair.new(cells[idx], cells[idx + 1])
 		assert(get_cellv(new_pair.tile1_cords) == get_cellv(new_pair.tile2_cords))
 		pairs.append(new_pair)
@@ -165,7 +171,8 @@ func _draw() -> void:
 					Color.gray)
 
 func set_board_size(val: Vector2) -> void:
-	assert(int(val.x * val.y) % 2 == 0)
+	if not (int(val.x * val.y) % 2 == 0):
+		val.x += 1
 	board_size = val + Vector2.ONE
 
 func setup_board_debug_mode() -> void:
@@ -173,22 +180,13 @@ func setup_board_debug_mode() -> void:
 		_add_collision(cell)
 
 func setup_board() -> void:
-	if not get_parent().debug_mode:
-		clear()
-	# setup outline
-	for x in board_size.x + 1:
-		set_cell(x, 0, EMPTY_TILE)
-# warning-ignore:narrowing_conversion
-		set_cell(x, board_size.y, EMPTY_TILE)
-	for y in board_size.y + 1:
-		set_cell(0, y, EMPTY_TILE)
-# warning-ignore:narrowing_conversion
-		set_cell(board_size.x, y, EMPTY_TILE)
+	clear()
 	_setup_colllision()
 	fill_board()
 
 func fill_board() -> void:
 	var free_cells: Array = get_free_cells(false)
+	assert(free_cells.size() % 2 == 0)
 	while not free_cells.empty():
 		var cell1 = free_cells.pop_at(int(rand_range(0, free_cells.size() - 1)))
 		var cell2 = free_cells.pop_at(int(rand_range(0, free_cells.size() - 1)))
@@ -263,7 +261,7 @@ func _add_collision(cell: Vector2) -> void:
 		cell_size,
 		map_to_world(cell) + cell_size / 2)
 	_tiles_areas2D[cell] = new_tile_area
-	new_tile_area.visible = get_parent().debug_mode
+	#new_tile_area.visible = get_parent().debug_mode
 
 func _setup_colllision() -> void:
 	_tiles_areas2D = {}
