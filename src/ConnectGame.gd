@@ -76,7 +76,8 @@ func _on_timeout() -> void:
 func _on_UI_next_level() -> void:
 	self.current_level += 1
 	moves_taken = 0
-	grid.setup_board()
+	current_board_size += Vector2.ONE
+	grid.start_new_game(current_board_size)
 
 func check_board() -> void:
 	if grid.check_win():
