@@ -37,7 +37,6 @@ cell_tile_origin = 1
 centered_textures = true
 collision_mask = 0
 format = 1
-tile_data = PoolIntArray( 65537, 6, 0, 65538, 15, 0, 65539, 12, 0, 65540, 18, 0, 131073, 23, 0, 131074, 12, 0, 131075, 2, 0, 131076, 23, 0, 196609, 15, 0, 196610, 18, 0, 196611, 6, 0, 196612, 2, 0 )
 script = ExtResource( 1 )
 board_size = Vector2( 12, 8 )
 clear_path_after = 0.5
@@ -144,17 +143,17 @@ custom_constants/separation = 27
 alignment = 1
 
 [node name="Label" type="Label" parent="UI/Pause/CenterContainer"]
-margin_top = 96.0
+margin_top = 100.0
 margin_right = 496.0
 margin_bottom = 114.0
 text = "PAUSED"
 align = 1
 
 [node name="Button" type="Button" parent="UI/Pause/CenterContainer"]
-margin_left = 196.0
+margin_left = 209.0
 margin_top = 141.0
-margin_right = 299.324
-margin_bottom = 183.251
+margin_right = 285.324
+margin_bottom = 179.251
 size_flags_horizontal = 6
 text = "resume"
 __meta__ = {
@@ -181,7 +180,6 @@ __meta__ = {
 [connection signal="misplay" from="Tiles" to="SFX" method="_on_Tiles_misplay"]
 [connection signal="pair_cleared" from="Tiles" to="SFX" method="_on_Tiles_pair_cleared"]
 [connection signal="pair_cleared" from="Tiles" to="Tiles/Hint" method="_on_Tiles_pair_cleared"]
-[connection signal="new_game" from="UI" to="." method="_on_UI_new_game"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="." method="_on_Restart_pressed"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="UI/TimeLeft" method="_on_Restart_pressed"]

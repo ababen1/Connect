@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=2 format=2]
+
+[ext_resource path="res://src/DifficultyData.gd" type="Script" id=1]
+
+[resource]
+script = ExtResource( 1 )
+name = "Easy"
+board_size = Vector2( 5, 4 )
+time_limit = 120.0

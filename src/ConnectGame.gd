@@ -1,9 +1,10 @@
 extends Node2D
 
+const NEW_GAME_POPUP = preload("res://src/UI/NewGameDialog.tscn")
+
 signal game_over(stats)
 signal level_completed(level_num)
 signal time_limit_changed(new_time)
-
 
 export var debug_mode: = false
 export var current_level: int = 1 setget set_current_level
@@ -16,7 +17,7 @@ onready var current_board_size = grid.board_size
 
 var moves_taken: int = 0
 var total_moves_taken: int = 0
-
+var current_difficulty: DifficultyData
 
 func _ready() -> void:
 	if not OS.is_debug_build():
@@ -25,17 +26,21 @@ func _ready() -> void:
 # warning-ignore:return_value_discarded
 	timer.connect("timeout", self, "_on_timeout")
 	$Tiles/RaycastsPathfinder.visible = debug_mode
-	start_new_game()
+	ui.connect("new_game", self, "start_new_game")
 	$UI/TimeLeft.set_time_left(self.time_limit)
+	ui.start_new_game()
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		$UI/Pause.toggle()
 	
-func start_new_game() -> void:
+func start_new_game(difficulty: DifficultyData) -> void:
+	current_difficulty = difficulty
 	timer.stop()
 	moves_taken = 0
 	total_moves_taken = 0
+	set_time_limit(difficulty.time_limit)
+	current_board_size = difficulty.board_size
 	grid.start_new_game(current_board_size)
 	yield(get_tree(), "idle_frame")
 	check_board()
@@ -59,7 +64,7 @@ func _on_pair_cleared(_pair) -> void:
 	check_board()
 
 func _on_Restart_pressed() -> void:
-	start_new_game()
+	ui.start_new_game()
 
 func _on_timeout() -> void:
 	var results: Dictionary = {
@@ -68,13 +73,10 @@ func _on_timeout() -> void:
 	}
 	emit_signal("game_over", results)
 
-func _on_UI_new_game() -> void:
-	start_new_game()
-
 func _on_UI_next_level() -> void:
 	self.current_level += 1
 	moves_taken = 0
-	start_new_game()
+	grid.setup_board()
 
 func check_board() -> void:
 	if grid.check_win():
