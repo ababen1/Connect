@@ -1,7 +1,7 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://src/ConnectGameTilemap.gd" type="Script" id=1]
-[ext_resource path="res://assets/ConnectGameTileSet.tres" type="TileSet" id=2]
+[ext_resource path="res://assets/Foods.tres" type="TileSet" id=2]
 [ext_resource path="res://src/HintLine.gd" type="Script" id=3]
 [ext_resource path="res://src/UI/DebugLabels.gd" type="Script" id=4]
 [ext_resource path="res://src/ConnectGame.gd" type="Script" id=5]
@@ -11,6 +11,7 @@
 [ext_resource path="res://src/RaycastsPathfinder.gd" type="Script" id=9]
 [ext_resource path="res://src/UI/ConnectGameUI.gd" type="Script" id=10]
 [ext_resource path="res://src/UI/Pause.gd" type="Script" id=11]
+[ext_resource path="res://src/GridSFX.gd" type="Script" id=12]
 
 [sub_resource type="StyleBoxFlat" id=1]
 bg_color = Color( 0.219608, 0.219608, 0.219608, 1 )
@@ -19,11 +20,15 @@ bg_color = Color( 0.219608, 0.219608, 0.219608, 1 )
 pause_mode = 2
 z_index = -2
 script = ExtResource( 5 )
+time_limit = 330.0
 
 [node name="Timer" type="Timer" parent="."]
 pause_mode = 1
 wait_time = 150.0
 one_shot = true
+
+[node name="SFX" type="AudioStreamPlayer" parent="."]
+script = ExtResource( 12 )
 
 [node name="Tiles" type="TileMap" parent="."]
 tile_set = ExtResource( 2 )
@@ -34,7 +39,7 @@ collision_mask = 0
 format = 1
 tile_data = PoolIntArray( 65537, 6, 0, 65538, 15, 0, 65539, 12, 0, 65540, 18, 0, 131073, 23, 0, 131074, 12, 0, 131075, 2, 0, 131076, 23, 0, 196609, 15, 0, 196610, 18, 0, 196611, 6, 0, 196612, 2, 0 )
 script = ExtResource( 1 )
-board_size = Vector2( 14, 8 )
+board_size = Vector2( 12, 8 )
 clear_path_after = 0.5
 
 [node name="Camera2D" type="Camera2D" parent="Tiles"]
@@ -61,19 +66,19 @@ margin_bottom = 64.0
 alignment = 2
 
 [node name="Restart" type="Button" parent="UI/Buttons"]
-margin_left = 327.0
-margin_top = 10.0
-margin_right = 439.324
-margin_bottom = 52.251
+margin_left = 368.0
+margin_top = 12.0
+margin_right = 450.324
+margin_bottom = 50.251
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Restart"
 
 [node name="Hint" type="Button" parent="UI/Buttons"]
-margin_left = 443.0
-margin_top = 10.0
+margin_left = 454.0
+margin_top = 12.0
 margin_right = 508.324
-margin_bottom = 52.251
+margin_bottom = 50.251
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Hint"
@@ -163,14 +168,18 @@ layer = -99
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color( 1, 1, 1, 0.133333 )
+color = Color( 0, 0, 0, 0.270588 )
 __meta__ = {
 "_edit_lock_": true
 }
 
+[connection signal="game_over" from="." to="SFX" method="_on_ConnectGame_game_over"]
 [connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
+[connection signal="level_completed" from="." to="SFX" method="_on_ConnectGame_level_completed"]
 [connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
 [connection signal="time_limit_changed" from="." to="UI/TimeLeft" method="_on_ConnectGame_time_limit_changed"]
+[connection signal="misplay" from="Tiles" to="SFX" method="_on_Tiles_misplay"]
+[connection signal="pair_cleared" from="Tiles" to="SFX" method="_on_Tiles_pair_cleared"]
 [connection signal="pair_cleared" from="Tiles" to="Tiles/Hint" method="_on_Tiles_pair_cleared"]
 [connection signal="new_game" from="UI" to="." method="_on_UI_new_game"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]

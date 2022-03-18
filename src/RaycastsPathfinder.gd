@@ -120,7 +120,7 @@ func _find_path_with_parallel_raycasts(
 		for long_cell in longer_cast_cells:
 			for short_cell in shorter_raycast_cells:
 				var connecting_raycast: = _create_raycast_between_cells(long_cell, short_cell)
-				if not connecting_raycast.is_colliding() and (
+				if connecting_raycast and not connecting_raycast.is_colliding() and (
 					not raycast_start.is_colliding() and (
 					not (raycast_end.is_colliding() and (
 					connecting_raycast.cast_to.normalized() in DIRECTIONS)))):
@@ -128,18 +128,19 @@ func _find_path_with_parallel_raycasts(
 							longer_raycast, 
 							shorter_raycast, 
 							connecting_raycast)
-				else:
-					connecting_raycast.queue_free()
 		return null
 
 func _create_raycast_between_cells(start: Vector2, end: Vector2) -> PathRaycast:
 	var new_raycast = _create_raycast(start)
 	var direction = start.direction_to(end)
-	var distance = new_raycast.global_position.distance_to(
-		grid.map_to_world(end) + grid.cell_size / 2)
-	new_raycast.cast_to = direction * distance
-	new_raycast.force_raycast_update()
-	return new_raycast
+	if direction in DIRECTIONS:
+		var distance = new_raycast.global_position.distance_to(
+			grid.map_to_world(end) + grid.cell_size / 2)
+		new_raycast.cast_to = direction * distance
+		new_raycast.force_raycast_update()
+		return new_raycast
+	else:
+		return null
 
 func _can_extend_cast(raycast: PathRaycast, extend_by: Vector2) -> bool:
 	return grid.get_rect_world().has_point(raycast.get_casting_global_pos() + extend_by) and (

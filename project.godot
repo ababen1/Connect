@@ -54,7 +54,7 @@ window/size/width=512
 window/size/height=300
 window/size/test_width=1024
 window/size/test_height=600
-window/stretch/mode="2d"
+window/stretch/mode="viewport"
 window/stretch/aspect="keep"
 
 [editor_plugins]
@@ -64,7 +64,7 @@ enabled=PoolStringArray( "res://addons/build-and-deploy/plugin.cfg" )
 [gui]
 
 theme/custom="res://assets/ui/themes/kenneyUI.tres"
-theme/custom_font="res://assets/ui/themes/KennyFont.tres"
+theme/custom_font="res://assets/ui/NewHiScoreFont.tres"
 
 [importer_defaults]
 

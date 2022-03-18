@@ -13,6 +13,7 @@ onready var debug_labels = owner.get_node("UI/DebugLabels")
 onready var pathfinder = $RaycastsPathfinder
 
 signal pair_cleared(pair)
+signal misplay
 
 var selected_cell
 var _tiles_areas2D: Dictionary = {}
@@ -41,6 +42,8 @@ func _unhandled_input(event: InputEvent) -> void:
 						var pair = TilesPair.new(selected_cell, cell_clicked)
 						remove_pair(pair)
 						emit_signal("pair_cleared", pair)
+					else:
+						emit_signal("misplay")
 					selected_cell = null
 
 func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
