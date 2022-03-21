@@ -16,6 +16,8 @@ signal pair_cleared(pair)
 signal misplay
 
 var selected_cell
+var selected_cell2
+
 var _tiles_areas2D: Dictionary = {}
 
 func _ready() -> void:
