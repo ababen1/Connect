@@ -16,7 +16,6 @@ signal pair_cleared(pair)
 signal misplay
 
 var selected_cell
-var selected_cell2
 
 var _tiles_areas2D: Dictionary = {}
 
@@ -28,25 +27,31 @@ func _process(_delta: float) -> void:
 	debug_labels.set_label("mouse_cell", get_mouse_cell() as String)
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
-		var cell_clicked = get_mouse_cell()
-		if 	get_cellv(cell_clicked) != INVALID_CELL and (
-			get_cellv(cell_clicked) != EMPTY_TILE):
-				if not selected_cell:
-					selected_cell = cell_clicked
-				elif selected_cell == cell_clicked:
-					selected_cell = null
+	if event.is_action_pressed("click") or (event is InputEventScreenTouch):
+		var cell_clicked = _get_cell_clicked(event)
+		if get_cellv(cell_clicked) != INVALID_CELL:
+			if not selected_cell:
+				selected_cell = cell_clicked
+			elif selected_cell == cell_clicked:
+				selected_cell = null
+			else:
+				var path: PathData = find_path(selected_cell, cell_clicked)
+				if path:
+					draw_path(path.get_line_path())
+					var pair = TilesPair.new(selected_cell, cell_clicked)
+					remove_pair(pair)
+					emit_signal("pair_cleared", pair)
 				else:
-					var path: PathData = find_path(selected_cell, cell_clicked)
-					if path:
-# warning-ignore:return_value_discarded
-						draw_path(path.get_line_path())
-						var pair = TilesPair.new(selected_cell, cell_clicked)
-						remove_pair(pair)
-						emit_signal("pair_cleared", pair)
-					else:
-						emit_signal("misplay")
-					selected_cell = null
+					emit_signal("misplay")
+				selected_cell = null
+
+func _get_cell_clicked(event: InputEvent) -> Vector2:
+	if event is InputEventMouseButton and event.is_action_pressed("click"):
+		return get_mouse_cell()
+	elif event is InputEventScreenTouch:
+		return to_global(world_to_map(event.position))
+	else:
+		return Vector2.INF
 
 func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 	self.board_size = board_size_
