@@ -1,20 +1,19 @@
-tool
+#@tool
 extends AcceptDialog
 
 signal play_again
 
 func _enter_tree() -> void:
-	self.get_ok().text = "Play Again"
+	self.get_ok_button().text = "Play Again"
 
 func _ready() -> void:
 	if not owner.debug_mode:
-		get_close_button().disabled = true
-		get_close_button().hide()
+		add_theme_icon_override("close", Texture2D.new())
 # warning-ignore:return_value_discarded
-	connect("confirmed", self, "_on_confirm")
+	connect("confirmed", Callable(self, "_on_confirm"))
 	
 func display_results(results: Dictionary) -> void:
-	if not Engine.editor_hint:
+	if not Engine.is_editor_hint():
 		dialog_text = ""
 		for result in results.keys():
 			dialog_text += str(result).capitalize() + ": " + str(results[result]) + "\n"

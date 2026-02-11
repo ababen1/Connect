@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/Click sound 25.wav-be9d22e69388bb6c1144094c124a321e.sample"
+type="AudioStreamWAV"
+uid="uid://o57nux5vyvr6"
+path="res://.godot/imported/Click sound 25.wav-be9d22e69388bb6c1144094c124a321e.sample"
 
 [deps]
 
 source_file="res://assets/sfx/Click sound 25.wav"
-dest_files=[ "res://.import/Click sound 25.wav-be9d22e69388bb6c1144094c124a321e.sample" ]
+dest_files=["res://.godot/imported/Click sound 25.wav-be9d22e69388bb6c1144094c124a321e.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

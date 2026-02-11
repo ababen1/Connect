@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample"
+type="AudioStreamWAV"
+uid="uid://b144ra2q5fc44"
+path="res://.godot/imported/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample"
 
 [deps]
 
 source_file="res://assets/sfx/Pop sound 9.wav"
-dest_files=[ "res://.import/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample" ]
+dest_files=["res://.godot/imported/Pop sound 9.wav-141c315d2233bf7013c17ea06459f3d6.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

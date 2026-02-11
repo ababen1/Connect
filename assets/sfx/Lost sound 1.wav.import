@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/Lost sound 1.wav-aa76dd4024a827c0f793e505099d404a.sample"
+type="AudioStreamWAV"
+uid="uid://dngl4k4swv8ei"
+path="res://.godot/imported/Lost sound 1.wav-aa76dd4024a827c0f793e505099d404a.sample"
 
 [deps]
 
 source_file="res://assets/sfx/Lost sound 1.wav"
-dest_files=[ "res://.import/Lost sound 1.wav-aa76dd4024a827c0f793e505099d404a.sample" ]
+dest_files=["res://.godot/imported/Lost sound 1.wav-aa76dd4024a827c0f793e505099d404a.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

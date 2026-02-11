@@ -1,19 +1,18 @@
-tool
+#@tool
 extends AcceptDialog
 
 signal next_level
 
 func _enter_tree() -> void:
-	get_close_button().disabled = true
-	get_close_button().hide()
-	get_ok().text = "Next level"
+	add_theme_icon_override("close", Texture2D.new())
+	get_ok_button().text = "Next level"
 
 func _ready() -> void:
 # warning-ignore:return_value_discarded
-	connect("confirmed", self, "_on_confirm")
+	connect("confirmed", Callable(self, "_on_confirm"))
 
 func display(level_num: int) -> void:
-	dialog_text = "Level {lvl} Completed!".format({"lvl": level_num as String})
+	dialog_text = "Level {lvl} Completed!".format({"lvl": var_to_str(level_num)})
 	popup()
 
 func _on_confirm() -> void:

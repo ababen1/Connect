@@ -1,4 +1,5 @@
 extends Node2D
+class_name ConnectGame
 
 const NEW_GAME_POPUP = preload("res://src/UI/NewGameDialog.tscn")
 
@@ -6,14 +7,14 @@ signal game_over(stats)
 signal level_completed(level_num)
 signal time_limit_changed(new_time)
 
-export var debug_mode: = false
-export var current_level: int = 1 setget set_current_level
-export var time_limit: = 210.0 setget set_time_limit
+@export var debug_mode: = false
+@export var current_level: int = 1: set = set_current_level
+@export var time_limit: = 210.0: set = set_time_limit
 
-onready var timer: Timer = $Timer
-onready var grid = $Tiles
-onready var ui = $UI
-onready var current_board_size = grid.board_size
+@onready var timer: Timer = $Timer
+@onready var grid = $Tiles
+@onready var ui = $UI
+@onready var current_board_size = grid.board_size
 
 var moves_taken: int = 0
 var total_moves_taken: int = 0
@@ -22,11 +23,11 @@ var current_difficulty: DifficultyData
 func _ready() -> void:
 	if not OS.is_debug_build():
 		debug_mode = false
-	grid.connect("pair_cleared", self, "_on_pair_cleared")
+	grid.connect("pair_cleared", Callable(self, "_on_pair_cleared"))
 # warning-ignore:return_value_discarded
-	timer.connect("timeout", self, "_on_timeout")
+	timer.connect("timeout", Callable(self, "_on_timeout"))
 	$Tiles/RaycastsPathfinder.visible = debug_mode
-	ui.connect("new_game", self, "start_new_game")
+	ui.connect("new_game", Callable(self, "start_new_game"))
 	$UI/TimeLeft.set_time_left(self.time_limit)
 	ui.start_new_game()
 
@@ -42,7 +43,7 @@ func start_new_game(difficulty: DifficultyData) -> void:
 	set_time_limit(difficulty.time_limit)
 	current_board_size = difficulty.board_size
 	grid.start_new_game(current_board_size)
-	yield(get_tree(), "idle_frame")
+	await get_tree().process_frame
 	check_board()
 
 func set_current_level(val: int) -> void:
@@ -51,7 +52,7 @@ func set_current_level(val: int) -> void:
 	
 func set_time_limit(val: float) -> void:
 	if not is_inside_tree():
-		yield(self, "ready")
+		await self.ready
 	time_limit = val
 	timer.wait_time = val
 	emit_signal("time_limit_changed", val)

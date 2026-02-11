@@ -4,20 +4,20 @@ class_name PathData
 enum {
 	DIRECT = 1,
 	TWO_CASTS = 2,
-	THREE_CASTS = 3
+	THREE_CASTS = 3,
 	INVALID = -1
 }
 
-var start_cast: PoolVector2Array
-var end_cast: PoolVector2Array
-var connecting_cast: PoolVector2Array
+var start_cast: PackedVector2Array
+var end_cast: PackedVector2Array
+var connecting_cast: PackedVector2Array
 
 func _init(start: PathRaycast = null, end: PathRaycast = null, connecting: PathRaycast = null) -> void:
-	start_cast = PoolVector2Array([start.global_position, start.get_casting_global_pos()]) if start else PoolVector2Array([])
-	end_cast = PoolVector2Array([end.global_position, end.get_casting_global_pos()]) if end else PoolVector2Array([])
-	connecting_cast = PoolVector2Array([connecting.global_position, connecting.get_casting_global_pos()]) if connecting else PoolVector2Array([])
+	start_cast = PackedVector2Array([start.global_position, start.get_casting_global_pos()]) if start else PackedVector2Array([])
+	end_cast = PackedVector2Array([end.global_position, end.get_casting_global_pos()]) if end else PackedVector2Array([])
+	connecting_cast = PackedVector2Array([connecting.global_position, connecting.get_casting_global_pos()]) if connecting else PackedVector2Array([])
 
-func get_line_path() -> PoolVector2Array:
+func get_line_path() -> PackedVector2Array:
 	match get_path_type():
 		DIRECT:
 			return start_cast
@@ -26,7 +26,7 @@ func get_line_path() -> PoolVector2Array:
 		THREE_CASTS:
 			return _make_path_with_three_casts()
 		_:
-			return PoolVector2Array([])
+			return PackedVector2Array([])
 	
 func get_path_length() -> float:
 	var start_cast_length = start_cast[0].distance_to(start_cast[1]) if start_cast else 0.0
@@ -44,21 +44,21 @@ func get_path_type() -> int:
 	else:
 		return INVALID
 
-func _make_path_with_two_casts() -> PoolVector2Array:
+func _make_path_with_two_casts() -> PackedVector2Array:
 	assert(get_path_type() == TWO_CASTS)
 	var intersection = get_intersection_point(start_cast, end_cast)
-	return PoolVector2Array([start_cast[0], intersection, end_cast[0]])
+	return PackedVector2Array([start_cast[0], intersection, end_cast[0]])
 
-func _make_path_with_three_casts() -> PoolVector2Array:
-	return PoolVector2Array([
+func _make_path_with_three_casts() -> PackedVector2Array:
+	return PackedVector2Array([
 		start_cast[0], 
 		connecting_cast[0], 
 		connecting_cast[1], 
 		end_cast[0]])
 
 static func get_intersection_point(
-	line1: PoolVector2Array, 
-	line2: PoolVector2Array) -> Vector2:
+	line1: PackedVector2Array, 
+	line2: PackedVector2Array) -> Vector2:
 		var point_a = line1[0]
 		var point_b = line1[1]
 		var point_c = line2[0]

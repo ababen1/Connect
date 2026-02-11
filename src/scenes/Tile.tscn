@@ -1,7 +1,7 @@
-[gd_scene load_steps=4 format=2]
+[gd_scene format=2]
 
-[ext_resource path="res://src/Tile.gd" type="Script" id=1]
-[ext_resource path="res://assets/sfx/Click sound 25.wav" type="AudioStream" id=2]
+[ext_resource type="Script" uid="uid://d2ff8f8b6hkvj" path="res://src/scenes/Tile.gd" id="1"]
+[ext_resource type="AudioStream" uid="uid://o57nux5vyvr6" path="res://assets/sfx/Click sound 25.wav" id="2"]
 
 [sub_resource type="RectangleShape2D" id=1]
 

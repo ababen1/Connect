@@ -11,7 +11,7 @@ func _init() -> void:
 	collision_mask = TILES_COLLISION_LAYER
 
 func get_casting_global_pos() -> Vector2:
-	return global_position + cast_to
+	return global_position + target_position
 
 func get_length() -> float:
 	return global_position.distance_to(get_casting_global_pos())
@@ -24,6 +24,6 @@ func as_line(config: = {}) -> Line2D:
 
 static func create_line(config: = {}) -> Line2D:
 	var line = Line2D.new()
-	line.default_color = config.get("color", Color.white)
+	line.default_color = config.get("color", Color.WHITE)
 	line.width = config.get("width", 2.0)
 	return line

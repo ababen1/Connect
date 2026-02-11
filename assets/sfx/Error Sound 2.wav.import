@@ -1,13 +1,14 @@
 [remap]
 
 importer="wav"
-type="AudioStreamSample"
-path="res://.import/Error Sound 2.wav-46fc0845b0fe6e904e024f504674056a.sample"
+type="AudioStreamWAV"
+uid="uid://1keluh4vjafq"
+path="res://.godot/imported/Error Sound 2.wav-46fc0845b0fe6e904e024f504674056a.sample"
 
 [deps]
 
 source_file="res://assets/sfx/Error Sound 2.wav"
-dest_files=[ "res://.import/Error Sound 2.wav-46fc0845b0fe6e904e024f504674056a.sample" ]
+dest_files=["res://.godot/imported/Error Sound 2.wav-46fc0845b0fe6e904e024f504674056a.sample"]
 
 [params]
 
@@ -17,5 +18,7 @@ force/max_rate=false
 force/max_rate_hz=44100
 edit/trim=false
 edit/normalize=false
-edit/loop=false
+edit/loop_mode=0
+edit/loop_begin=0
+edit/loop_end=-1
 compress/mode=0

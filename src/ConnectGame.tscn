@@ -1,185 +1,129 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene format=3 uid="uid://5irgl7lwrf0t"]
 
-[ext_resource path="res://src/ConnectGameTilemap.gd" type="Script" id=1]
-[ext_resource path="res://assets/Foods.tres" type="TileSet" id=2]
-[ext_resource path="res://src/HintLine.gd" type="Script" id=3]
-[ext_resource path="res://src/UI/DebugLabels.gd" type="Script" id=4]
-[ext_resource path="res://src/ConnectGame.gd" type="Script" id=5]
-[ext_resource path="res://src/UI/LevelCompleteDialog.gd" type="Script" id=6]
-[ext_resource path="res://src/UI/TimeLeft.gd" type="Script" id=7]
-[ext_resource path="res://src/UI/GameOverDialog.gd" type="Script" id=8]
-[ext_resource path="res://src/RaycastsPathfinder.gd" type="Script" id=9]
-[ext_resource path="res://src/UI/ConnectGameUI.gd" type="Script" id=10]
-[ext_resource path="res://src/UI/Pause.gd" type="Script" id=11]
-[ext_resource path="res://src/GridSFX.gd" type="Script" id=12]
+[ext_resource type="PackedScene" uid="uid://cdb5wy8vb4e7s" path="res://src/scenes/ConnectGameTilemap.tscn" id="3_uyav2"]
+[ext_resource type="Script" uid="uid://bsrk8l4vntjf5" path="res://src/UI/DebugLabels.gd" id="4"]
+[ext_resource type="Script" uid="uid://c4val744hlv7e" path="res://src/ConnectGame.gd" id="5"]
+[ext_resource type="Script" uid="uid://cdlnp8bw2nyvv" path="res://src/UI/LevelCompleteDialog.gd" id="6"]
+[ext_resource type="Script" uid="uid://c1xwbc4epp7m2" path="res://src/UI/TimeLeft.gd" id="7"]
+[ext_resource type="Script" uid="uid://cx7scpo7cgvri" path="res://src/UI/GameOverDialog.gd" id="8"]
+[ext_resource type="Script" uid="uid://b57kiua0ti1qu" path="res://src/UI/ConnectGameUI.gd" id="10"]
+[ext_resource type="Script" uid="uid://cxdvrtpsbdorv" path="res://src/UI/Pause.gd" id="11"]
+[ext_resource type="Script" uid="uid://b6k883d04p83t" path="res://src/GridSFX.gd" id="12"]
 
-[sub_resource type="StyleBoxFlat" id=1]
-bg_color = Color( 0.219608, 0.219608, 0.219608, 1 )
+[sub_resource type="StyleBoxFlat" id="1"]
+bg_color = Color(0.219608, 0.219608, 0.219608, 1)
 
-[node name="ConnectGame" type="Node2D"]
-pause_mode = 2
+[node name="ConnectGame" type="Node2D" unique_id=494267948]
+process_mode = 3
 z_index = -2
-script = ExtResource( 5 )
+script = ExtResource("5")
 time_limit = 330.0
 
-[node name="Timer" type="Timer" parent="."]
-pause_mode = 1
+[node name="Timer" type="Timer" parent="." unique_id=227945049]
+process_mode = 1
 wait_time = 150.0
 one_shot = true
 
-[node name="SFX" type="AudioStreamPlayer" parent="."]
-script = ExtResource( 12 )
+[node name="SFX" type="AudioStreamPlayer" parent="." unique_id=1603971192]
+script = ExtResource("12")
 
-[node name="Tiles" type="TileMap" parent="."]
-tile_set = ExtResource( 2 )
-cell_size = Vector2( 16, 16 )
-cell_tile_origin = 1
-centered_textures = true
-collision_mask = 0
-format = 1
-script = ExtResource( 1 )
-board_size = Vector2( 12, 8 )
-clear_path_after = 0.5
+[node name="TileMapLayer" parent="." unique_id=1207132186 instance=ExtResource("3_uyav2")]
+position = Vector2(-1, -2)
 
-[node name="Camera2D" type="Camera2D" parent="Tiles"]
-visible = false
-current = true
+[node name="UI" type="CanvasLayer" parent="." unique_id=560256236]
+script = ExtResource("10")
 
-[node name="Hint" type="Line2D" parent="Tiles"]
-width = 2.0
-default_color = Color( 0.815686, 0.792157, 0.792157, 1 )
-script = ExtResource( 3 )
-
-[node name="RaycastsPathfinder" type="Node2D" parent="Tiles"]
-script = ExtResource( 9 )
-
-[node name="UI" type="CanvasLayer" parent="."]
-script = ExtResource( 10 )
-
-[node name="Buttons" type="HBoxContainer" parent="UI"]
+[node name="Buttons" type="HBoxContainer" parent="UI" unique_id=507087663]
+anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -512.0
-margin_right = -4.0
-margin_bottom = 64.0
+offset_left = -512.0
+offset_right = -4.0
+offset_bottom = 64.0
 alignment = 2
 
-[node name="Restart" type="Button" parent="UI/Buttons"]
-margin_left = 368.0
-margin_top = 12.0
-margin_right = 450.324
-margin_bottom = 50.251
+[node name="Restart" type="Button" parent="UI/Buttons" unique_id=2103811991]
+layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Restart"
 
-[node name="Hint" type="Button" parent="UI/Buttons"]
-margin_left = 454.0
-margin_top = 12.0
-margin_right = 508.324
-margin_bottom = 50.251
+[node name="Hint" type="Button" parent="UI/Buttons" unique_id=1953853135]
+layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Hint"
 
-[node name="TimeLeft" type="Label" parent="UI"]
-margin_left = 21.0
-margin_top = 22.0
-margin_right = 57.0
-margin_bottom = 36.0
+[node name="TimeLeft" type="Label" parent="UI" unique_id=1691850099]
+offset_left = 21.0
+offset_top = 22.0
+offset_right = 57.0
+offset_bottom = 36.0
 text = "00:00"
-script = ExtResource( 7 )
+script = ExtResource("7")
 timer_node = NodePath("../../Timer")
 
-[node name="DebugLabels" type="VBoxContainer" parent="UI"]
-margin_right = 171.0
-margin_bottom = 109.0
+[node name="DebugLabels" type="VBoxContainer" parent="UI" unique_id=963834346]
+offset_right = 171.0
+offset_bottom = 109.0
 mouse_filter = 2
-script = ExtResource( 4 )
+script = ExtResource("4")
 
-[node name="GameOverDialog" type="AcceptDialog" parent="UI"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -119.0
-margin_top = -58.0
-margin_right = 119.0
-margin_bottom = 58.0
-popup_exclusive = true
-window_title = "Time's up!"
-script = ExtResource( 8 )
+[node name="GameOverDialog" type="AcceptDialog" parent="UI" unique_id=1961361360]
+script = ExtResource("8")
 
-[node name="LevelCompleteDialog" type="AcceptDialog" parent="UI"]
+[node name="LevelCompleteDialog" type="AcceptDialog" parent="UI" unique_id=823693668]
+oversampling_override = 1.0
+position = Vector2i(0, 36)
+size = Vector2i(109, 100)
 visible = true
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -119.0
-margin_top = -58.0
-margin_right = 119.0
-margin_bottom = 86.0
-popup_exclusive = true
-window_title = "Good Job!"
-script = ExtResource( 6 )
+script = ExtResource("6")
 
-[node name="Pause" type="Panel" parent="UI"]
-pause_mode = 2
+[node name="Pause" type="Panel" parent="UI" unique_id=1373248451]
+process_mode = 3
 visible = false
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = 8.0
-margin_top = 10.0
-margin_right = -8.0
-margin_bottom = -10.0
-custom_styles/panel = SubResource( 1 )
-script = ExtResource( 11 )
+offset_left = 8.0
+offset_top = 10.0
+offset_right = -8.0
+offset_bottom = -10.0
+theme_override_styles/panel = SubResource("1")
+script = ExtResource("11")
 
-[node name="CenterContainer" type="VBoxContainer" parent="UI/Pause"]
+[node name="CenterContainer" type="VBoxContainer" parent="UI/Pause" unique_id=1270111271]
+layout_mode = 0
 anchor_right = 1.0
 anchor_bottom = 1.0
-custom_constants/separation = 27
+theme_override_constants/separation = 27
 alignment = 1
 
-[node name="Label" type="Label" parent="UI/Pause/CenterContainer"]
-margin_top = 100.0
-margin_right = 496.0
-margin_bottom = 114.0
+[node name="Label" type="Label" parent="UI/Pause/CenterContainer" unique_id=2040103182]
+layout_mode = 2
 text = "PAUSED"
-align = 1
+horizontal_alignment = 1
 
-[node name="Button" type="Button" parent="UI/Pause/CenterContainer"]
-margin_left = 209.0
-margin_top = 141.0
-margin_right = 285.324
-margin_bottom = 179.251
+[node name="Button" type="Button" parent="UI/Pause/CenterContainer" unique_id=1129420033]
+layout_mode = 2
 size_flags_horizontal = 6
 text = "resume"
-__meta__ = {
-"_edit_use_anchors_": true
-}
 
-[node name="CanvasLayer" type="CanvasLayer" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1789344933]
 layer = -99
 
-[node name="ColorRect" type="ColorRect" parent="CanvasLayer"]
+[node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=410314458]
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 mouse_filter = 2
-color = Color( 0, 0, 0, 0.270588 )
-__meta__ = {
-"_edit_lock_": true
-}
+color = Color(0, 0, 0, 0.270588)
 
 [connection signal="game_over" from="." to="SFX" method="_on_ConnectGame_game_over"]
 [connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
 [connection signal="level_completed" from="." to="SFX" method="_on_ConnectGame_level_completed"]
 [connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
 [connection signal="time_limit_changed" from="." to="UI/TimeLeft" method="_on_ConnectGame_time_limit_changed"]
-[connection signal="misplay" from="Tiles" to="SFX" method="_on_Tiles_misplay"]
-[connection signal="pair_cleared" from="Tiles" to="SFX" method="_on_Tiles_pair_cleared"]
-[connection signal="pair_cleared" from="Tiles" to="Tiles/Hint" method="_on_Tiles_pair_cleared"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="." method="_on_Restart_pressed"]
 [connection signal="pressed" from="UI/Buttons/Restart" to="UI/TimeLeft" method="_on_Restart_pressed"]

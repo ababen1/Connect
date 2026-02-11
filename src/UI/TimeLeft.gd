@@ -1,8 +1,8 @@
 extends Label
 
-export var timer_node: NodePath setget set_timer_node
+@export var timer_node: NodePath: set = set_timer_node
 
-var _timer: Timer setget ,get_timer
+var _timer: Timer: get = get_timer
 
 func _process(_delta: float) -> void:
 	if _timer and not _timer.is_stopped():
@@ -15,7 +15,7 @@ func set_time_left(time_left: float) -> void:
 
 func set_timer_node(val: NodePath) -> void:
 	if not is_inside_tree():
-		yield(self, "ready")
+		await self.ready
 	timer_node = val
 	_timer = get_node_or_null(val) as Timer
 	if _timer:

@@ -1,0 +1,22 @@
+[gd_scene format=3 uid="uid://cdb5wy8vb4e7s"]
+
+[ext_resource type="TileSet" uid="uid://cyhlnxualpbr6" path="res://assets/Tiles.tres" id="1_ppxek"]
+[ext_resource type="Script" uid="uid://bp6n4lw1b8u8m" path="res://src/scenes/ConnectGameTilemap4.gd" id="1_trmpw"]
+[ext_resource type="Script" uid="uid://72qxsxiqeqt4" path="res://src/RaycastsPathfinder.gd" id="2_ppxek"]
+[ext_resource type="Script" uid="uid://b5bvmwpa7qbc7" path="res://src/HintLine.gd" id="3_uv358"]
+
+[node name="TileMapLayer" type="TileMapLayer" unique_id=1207132186]
+tile_set = ExtResource("1_ppxek")
+script = ExtResource("1_trmpw")
+include_catagories = Array[String](["food"])
+
+[node name="RaycastsPathfinder" type="Node2D" parent="." unique_id=794724020]
+script = ExtResource("2_ppxek")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1707061055]
+visible = false
+
+[node name="Hint" type="Line2D" parent="." unique_id=1870967939]
+width = 2.0
+default_color = Color(0.815686, 0.792157, 0.792157, 1)
+script = ExtResource("3_uv358")

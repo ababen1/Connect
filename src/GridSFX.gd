@@ -18,7 +18,7 @@ func _on_Tiles_misplay() -> void:
 func _on_ConnectGame_level_completed(_level_num) -> void:
 	if playing:
 		stop()
-		yield(get_tree(), "idle_frame")
+		await get_tree().process_frame
 	stream = WIN_SOUND
 	play()
 
