@@ -14,7 +14,6 @@ include_catagories = Array[String](["food"])
 script = ExtResource("2_ppxek")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1707061055]
-visible = false
 
 [node name="Hint" type="Line2D" parent="." unique_id=1870967939]
 width = 2.0
