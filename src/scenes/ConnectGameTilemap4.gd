@@ -9,21 +9,22 @@ const TILE = preload("Tile.tscn")
 @export var draw_border: = true
 @export var clear_path_after: float = 0.3
 @export var include_catagories: Array[String]
-@onready var pathfinder = $RaycastsPathfinder
 
 signal pair_cleared(pair)
 signal misplay
 
-var selected_cell
+var selected_cell: Vector2i 
 var _tiles_areas2D: Dictionary = {}
+var pathfinder: = OnetPathfinder.new(self)
 
 func _ready() -> void:
+	changed.connect(func(): $Camera2D.position = get_rect_world().get_center())
 	if get_tree().current_scene == self:
 		setup_board()
 				
 func _process(_delta: float) -> void:
 	queue_redraw()
-
+	
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
 		var cell_clicked = get_mouse_cell()
@@ -31,18 +32,18 @@ func _unhandled_input(event: InputEvent) -> void:
 				if not selected_cell:
 					selected_cell = cell_clicked
 				elif selected_cell == cell_clicked:
-					selected_cell = null
+					selected_cell = Vector2i.ZERO
 				else:
-					var path: PathData = find_path(selected_cell, cell_clicked)
+					var path: Array = find_path(selected_cell, cell_clicked)
 					if path:
-# warning-ignore:return_value_discarded
-						draw_path(path.get_line_path())
+						#draw_path(path.get_line_path())
+						print("valid!")
 						var pair = TilesPair.new(selected_cell, cell_clicked)
 						remove_pair(pair)
 						emit_signal("pair_cleared", pair)
 					else:
 						emit_signal("misplay")
-					selected_cell = null
+					selected_cell = Vector2i.ZERO
 
 func get_cellv(cell_clicked: Vector2) -> int:
 	return get_cell_source_id(Vector2i(cell_clicked))
@@ -61,12 +62,12 @@ func get_possible_tiles_of_categories(categories: Array[String]) -> Array[TileDa
 func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 	self.board_size = board_size_
 	$Hint.remove_hint()
-	$Camera2D.position = get_rect_world().position + get_rect_world().size / 2
 
-func find_path(from: Vector2, to: Vector2) -> PathData:
-	var path: PathData
-	if get_cellv(from) == get_cellv(to):
-		path = pathfinder.find_shortest_path(from, to)
+func find_path(from: Vector2i, to: Vector2i) -> Array:
+	var path: Array = []
+	## Check if the selected cells have the same icon
+	if TileMapFuncs.are_tiles_same(self, from, to):
+		path = pathfinder.find_path_from_map_coords(from,to)
 	return path
 
 func draw_path(points: PackedVector2Array, time_on_screen: float = clear_path_after) -> void:
@@ -77,9 +78,6 @@ func draw_path(points: PackedVector2Array, time_on_screen: float = clear_path_af
 	if sign(time_on_screen) == 1:	
 	# warning-ignore:return_value_discarded
 		get_tree().create_timer(time_on_screen).connect("timeout", Callable(line, "queue_free"))
-	
-func as_index(cell: Vector2) -> int:
-	return int(cell.x + tile_set.tile_size.x * cell.y)
 	
 func display_hint() -> void:
 	var possible_paths = get_all_possible_paths().values()
@@ -117,8 +115,6 @@ func swap_pairs(pair1: TilesPair, pair2: TilesPair) -> void:
 func remove_pair(pair: TilesPair) -> void:
 	set_cellv(pair.tile1_cords, EMPTY_TILE)
 	set_cellv(pair.tile2_cords, EMPTY_TILE)
-	disable_cell_collision(pair.tile1_cords)
-	disable_cell_collision(pair.tile2_cords)
 
 func get_all_possible_paths() -> Dictionary:
 	var paths: = {}
@@ -153,33 +149,36 @@ func get_all_pairs_of(tile_id: int) -> Array:
 	return pairs
 
 func _draw() -> void:
+	## Draw outline around the hovered cell
 	var mouse_cell = get_mouse_cell()
 	if get_cellv(mouse_cell) != EMPTY_TILE:
 		draw_rect(
-			Rect2(map_to_local(mouse_cell), tile_set.tile_size),
+			Rect2(map_to_local(mouse_cell) - Vector2(tile_set.tile_size) / 2.0, tile_set.tile_size),
 			Color.WHITE,
 			false
 		)
+	
+	## Draw an outline around the selected (clicked) cell	
 	if selected_cell:
 		draw_rect(
-			Rect2(map_to_local(selected_cell), tile_set.tile_size),
+			Rect2(map_to_local(selected_cell) - Vector2(tile_set.tile_size) / 2.0, tile_set.tile_size),
 			Color.YELLOW_GREEN,
 			false,
 			2
 		)
-	if get_parent() is ConnectGame and get_parent().debug_mode:
+	if draw_border and Engine.is_embedded_in_editor():
 		draw_rect(
 			get_rect_world(), 
 			Color.WHITE,
 			false,
 			2
 		)
-		for y in board_size.y + 1:
-			for x in board_size.x + 1:
-				if is_border_cell(Vector2(x,y)):
-					draw_rect(
-					Rect2(map_to_local(Vector2(x,y)), tile_set.tile_size),
-					Color.GRAY)
+		#for y in board_size.y + 1:
+			#for x in board_size.x + 1:
+				#if is_border_cell(Vector2(x,y)):
+					#draw_rect(
+					#Rect2(map_to_local(Vector2(x,y)), tile_set.tile_size),
+					#Color.GRAY)
 
 func set_board_size(val: Vector2) -> void:
 	if not (int(val.x * val.y) % 2 == 0):
@@ -190,6 +189,7 @@ func setup_board() -> void:
 	clear()
 	fill_board()
 
+## Inital board setup - fill the board with pairs
 func fill_board() -> void:
 	var free_cells: Array = get_free_cells(false)
 	assert(free_cells.size() % 2 == 0)
@@ -242,26 +242,11 @@ func get_free_cells(include_border: = false) -> PackedVector2Array:
 func get_mouse_pos() -> Vector2:
 	return get_global_mouse_position()
 
-func get_mouse_cell() -> Vector2:
+func get_mouse_cell() -> Vector2i:
 	return local_to_map(to_local(get_mouse_pos()))
 
 func get_area2D_at(cell: Vector2) -> Area2D:
 	return _tiles_areas2D.get(cell, null)
 
-func disable_cell_collision(cell: Vector2) -> void:
-	var collision_area: Area2D = get_area2D_at(cell)
-	collision_area.shape_owner_set_disabled(0, true)
-	collision_area.visible = false
-
 func check_win() -> bool:
 	return get_used_cells().is_empty()
-
-func _add_collision(cell: Vector2) -> void:
-	var new_tile_area = TILE.instantiate()
-	add_child(new_tile_area)
-	new_tile_area.add_to_group("tile_areas")
-	new_tile_area.setup(
-		tile_set.tile_size,
-		map_to_local(cell) + Vector2(tile_set.tile_size / 2))
-	_tiles_areas2D[cell] = new_tile_area
-	#new_tile_area.visible = get_parent().debug_mode
