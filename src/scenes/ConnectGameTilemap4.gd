@@ -9,6 +9,8 @@ const TILE = preload("Tile.tscn")
 @export var draw_border: = true
 @export var clear_path_after: float = 0.3
 @export var include_catagories: Array[String]
+## A template for a line2D that will be used to display the path
+@export var line_template: Line2D
 
 signal pair_cleared(pair)
 signal misplay
@@ -34,9 +36,9 @@ func _unhandled_input(event: InputEvent) -> void:
 				elif selected_cell == cell_clicked:
 					selected_cell = Vector2i.ZERO
 				else:
-					var path: Array = find_path(selected_cell, cell_clicked)
+					var path: Array[Vector2i] = find_path(selected_cell, cell_clicked)
 					if path:
-						#draw_path(path.get_line_path())
+						draw_path(path)
 						print("valid!")
 						var pair = TilesPair.new(selected_cell, cell_clicked)
 						remove_pair(pair)
@@ -63,21 +65,23 @@ func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 	self.board_size = board_size_
 	$Hint.remove_hint()
 
-func find_path(from: Vector2i, to: Vector2i) -> Array:
-	var path: Array = []
+func find_path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
+	var path: Array[Vector2i] = []
 	## Check if the selected cells have the same icon
 	if TileMapFuncs.are_tiles_same(self, from, to):
 		path = pathfinder.find_path_from_map_coords(from,to)
 	return path
 
-func draw_path(points: PackedVector2Array, time_on_screen: float = clear_path_after) -> void:
-	var line: = PathRaycast.create_line()
-	for point in points:
-		line.add_point(point)
+func draw_path(points: Array[Vector2i], time_on_screen: float = clear_path_after) -> void:
+	var line: = line_template.duplicate()
+	line.clear_points()
+	line.show()
+	line.position = Vector2.ZERO
 	add_child(line)
-	if sign(time_on_screen) == 1:	
-	# warning-ignore:return_value_discarded
-		get_tree().create_timer(time_on_screen).connect("timeout", Callable(line, "queue_free"))
+	for p in points:
+		line.add_point(map_to_local(p))
+	get_tree().create_timer(time_on_screen).timeout.connect(func(): line.queue_free())	
+	
 	
 func display_hint() -> void:
 	var possible_paths = get_all_possible_paths().values()

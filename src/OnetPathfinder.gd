@@ -62,28 +62,31 @@ func is_straight_clear(p1: Vector2i, p2: Vector2i) -> bool:
 			if not is_cell_empty(Vector2i(x, p1.y)): return false
 	return true
 
-func check_1_bend(p1: Vector2i, p2: Vector2i) -> Array:
+func check_1_bend(p1: Vector2i, p2: Vector2i) -> Array[Vector2i]:
 	var corners = [Vector2i(p1.x, p2.y), Vector2i(p2.x, p1.y)]
 	for c in corners:
 		if is_cell_empty(c) and is_straight_clear(p1, c) and is_straight_clear(c, p2):
 			return [p1, c, p2]
 	return []
 
-func check_2_bends(p1: Vector2i, p2: Vector2i) -> Array:
+func check_2_bends(p1: Vector2i, p2: Vector2i) -> Array[Vector2i]:
 	var directions = [Vector2i.UP, Vector2i.DOWN, Vector2i.LEFT, Vector2i.RIGHT]
 	for dir in directions:
 		var current = p1 + dir
 		while is_within_bounds(current) and is_cell_empty(current):
 			var path_from_here = check_1_bend(current, p2)
 			if path_from_here.size() > 0:
-				return [p1] + path_from_here
+				var result: Array[Vector2i] = []
+				result.append(p1)
+				result.append_array(path_from_here)
+				return result
 			current += dir
 	return []
 
 # --- PUBLIC API ---
 
 ## Call this from your Game Controller. Uses TileMap coordinates.
-func find_path_from_map_coords(m1: Vector2i, m2: Vector2i) -> Array:
+func find_path_from_map_coords(m1: Vector2i, m2: Vector2i) -> Array[Vector2i]:
 	sync_grid_to_tilemap()
 	# Convert TileMap coords to our padded Grid coords
 	var g1 = m1 - map_offset
@@ -92,13 +95,14 @@ func find_path_from_map_coords(m1: Vector2i, m2: Vector2i) -> Array:
 	if g1 == g2 or not do_tiles_match(g1, g2):
 		return []
 	
-	var res = []
-	if is_straight_clear(g1, g2): res = [g1, g2]
+	var res: Array[Vector2i] = []
+	if is_straight_clear(g1, g2): 
+		res.assign([g1, g2])
 	if res.is_empty(): res = check_1_bend(g1, g2)
 	if res.is_empty(): res = check_2_bends(g1, g2)
 	
 	# Convert the path back to TileMap coordinates for drawing/deletion
-	var map_path = []
+	var map_path: Array[Vector2i] = []
 	for p in res:
 		map_path.append(p + map_offset)
 	return map_path

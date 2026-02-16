@@ -4,10 +4,11 @@
 [ext_resource type="Script" uid="uid://bp6n4lw1b8u8m" path="res://src/scenes/ConnectGameTilemap4.gd" id="1_trmpw"]
 [ext_resource type="Script" uid="uid://b5bvmwpa7qbc7" path="res://src/HintLine.gd" id="3_uv358"]
 
-[node name="TileMapLayer" type="TileMapLayer" unique_id=1207132186]
+[node name="TileMapLayer" type="TileMapLayer" unique_id=1207132186 node_paths=PackedStringArray("line_template")]
 tile_set = ExtResource("1_ppxek")
 script = ExtResource("1_trmpw")
 include_catagories = Array[String](["food"])
+line_template = NodePath("LineTemplate")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1707061055]
 
@@ -15,3 +16,11 @@ include_catagories = Array[String](["food"])
 width = 2.0
 default_color = Color(0.815686, 0.792157, 0.792157, 1)
 script = ExtResource("3_uv358")
+
+[node name="LineTemplate" type="Line2D" parent="." unique_id=218653533]
+visible = false
+points = PackedVector2Array(97, 65, 172, 65, 172, 87, 97, 87)
+width = 2.0
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
