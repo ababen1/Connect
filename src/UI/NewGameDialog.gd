@@ -1,4 +1,4 @@
-extends Window
+extends Control
 
 signal difficulty_selected(difficulty)
 

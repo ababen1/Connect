@@ -2,23 +2,19 @@ class_name TileMapFuncs
 
 ## Serializes a cell
 static func get_cell_id(tilemap: TileMapLayer, cell: Vector2i) -> String:
-	return var_to_str(get_cell_identifiers(tilemap, cell))
+	return var_to_str(TileIdentifiers.from_tilemap(cell, tilemap))
 
-## Get identifiers for a given cell
-static func get_cell_identifiers(tilemap: TileMapLayer, cell: Vector2i) -> Dictionary:
-	var source_id = tilemap.get_cell_source_id(cell)
-	var atlas_coords = tilemap.get_cell_atlas_coords(cell)
-	var alternative_id = tilemap.get_cell_alternative_tile(cell)
-	return {
-		"source_id": source_id,
-		"atlas_coords": atlas_coords, 
-		"alternative_id": alternative_id	
-	}
+static func get_identifiers_from_meta(tile: TileData) -> TileIdentifiers:
+	return TileIdentifiers.from_dict({
+		"source_id":  tile.get_meta("source_id", -1), 
+		"atlas_coords": tile.get_meta("atlas_coords", -Vector2i.ONE),
+		"alternative_id": tile.get_meta("alternative_id", -1)
+	})
 	
 ## Check if a given cell is empty	
 static func is_empty_cell(tilemap: TileMapLayer, cell: Vector2i) -> bool:
-	var identifiers: = get_cell_identifiers(tilemap, cell)
-	return identifiers.source_id != -1 and identifiers.atlas_coords != -Vector2i.ONE
+	var identifiers: = TileIdentifiers.from_tilemap(cell, tilemap)
+	return identifiers.source_id == -1 or identifiers.atlas_coords == -Vector2i.ONE
 
 ## Checks if two tiles are identitcal 
 static func are_tiles_same(tilemap: TileMapLayer, coords1: Vector2i, coords2: Vector2i) -> bool:

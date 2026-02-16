@@ -1,39 +1,44 @@
 extends Node2D
 class_name ConnectGame
 
-const NEW_GAME_POPUP = preload("res://src/UI/NewGameDialog.tscn")
-
 signal game_over(stats)
 signal level_completed(level_num)
 signal time_limit_changed(new_time)
+
+enum STATE {
+	SELECT_DIFFICULTY,
+	PLAYING,
+	GAME_OVER,
+}
 
 @export var debug_mode: = false
 @export var current_level: int = 1: set = set_current_level
 @export var time_limit: = 210.0: set = set_time_limit
 
+
+@onready var game_grid: ConnectGameGrid = %GameGrid
 @onready var timer: Timer = $Timer
-@onready var grid = $Tiles
 @onready var ui = $UI
-@onready var current_board_size = grid.board_size
 
 var moves_taken: int = 0
 var total_moves_taken: int = 0
 var current_difficulty: DifficultyData
+var current_state: = STATE.SELECT_DIFFICULTY : set = set_current_state
 
 func _ready() -> void:
 	if not OS.is_debug_build():
 		debug_mode = false
-	grid.connect("pair_cleared", Callable(self, "_on_pair_cleared"))
-# warning-ignore:return_value_discarded
-	timer.connect("timeout", Callable(self, "_on_timeout"))
-	$Tiles/RaycastsPathfinder.visible = debug_mode
-	ui.connect("new_game", Callable(self, "start_new_game"))
-	$UI/TimeLeft.set_time_left(self.time_limit)
-	ui.start_new_game()
+	game_grid.pair_cleared.connect(_on_pair_cleared)
+	timer.timeout.connect(_on_timeout)
+	ui.new_game.connect(start_new_game)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
 		$UI/Pause.toggle()
+
+func set_current_state(val: STATE) -> void:
+	current_state = val
+	
 	
 func start_new_game(difficulty: DifficultyData) -> void:
 	current_difficulty = difficulty
@@ -41,14 +46,13 @@ func start_new_game(difficulty: DifficultyData) -> void:
 	moves_taken = 0
 	total_moves_taken = 0
 	set_time_limit(difficulty.time_limit)
-	current_board_size = difficulty.board_size
-	grid.start_new_game(current_board_size)
+	game_grid.start_new_game(difficulty.board_size)
 	await get_tree().process_frame
 	check_board()
 
 func set_current_level(val: int) -> void:
 	current_level = val
-	current_board_size += Vector2.ONE
+	game_grid.board_size += Vector2i.ONE
 	
 func set_time_limit(val: float) -> void:
 	if not is_inside_tree():
@@ -77,16 +81,19 @@ func _on_timeout() -> void:
 func _on_UI_next_level() -> void:
 	self.current_level += 1
 	moves_taken = 0
-	current_board_size += Vector2.ONE
-	grid.start_new_game(current_board_size)
+
 
 func check_board() -> void:
-	if grid.check_win():
-		emit_signal("level_completed", current_level)
+	if game_grid.check_win():
+		level_completed.emit(current_level)
 		timer.stop()
 	else:
-		while not grid.has_possible_paths():
-			grid.shuffle_board()
+		while not game_grid.has_possible_paths():
+			game_grid.shuffle_board()
 
 func _on_Hint_pressed() -> void:
-	grid.display_hint()
+	game_grid.display_hint()
+
+
+func _on_new_game_dialog_difficulty_selected(difficulty: DifficultyData) -> void:
+	start_new_game(difficulty)

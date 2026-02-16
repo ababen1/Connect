@@ -1,16 +1,20 @@
 [gd_scene format=3 uid="uid://cdb5wy8vb4e7s"]
 
 [ext_resource type="TileSet" uid="uid://cyhlnxualpbr6" path="res://assets/Tiles.tres" id="1_ppxek"]
-[ext_resource type="Script" uid="uid://bp6n4lw1b8u8m" path="res://src/scenes/ConnectGameTilemap4.gd" id="1_trmpw"]
+[ext_resource type="Script" uid="uid://bp6n4lw1b8u8m" path="res://src/scenes/ConnectGameGrid.gd" id="1_trmpw"]
 [ext_resource type="Script" uid="uid://b5bvmwpa7qbc7" path="res://src/HintLine.gd" id="3_uv358"]
 
-[node name="TileMapLayer" type="TileMapLayer" unique_id=1207132186 node_paths=PackedStringArray("line_template")]
+[node name="ConnectGameGrid" type="TileMapLayer" unique_id=1207132186 node_paths=PackedStringArray("line_template")]
+texture_filter = 3
 tile_set = ExtResource("1_ppxek")
 script = ExtResource("1_trmpw")
+board_size = Vector2i(3, 2)
 include_catagories = Array[String](["food"])
 line_template = NodePath("LineTemplate")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1707061055]
+position = Vector2(79, 78)
+zoom = Vector2(2.8, 2.8)
 
 [node name="Hint" type="Line2D" parent="." unique_id=1870967939]
 width = 2.0

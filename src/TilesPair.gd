@@ -1,12 +1,14 @@
 extends Resource
-class_name TilesPair
+class_name PairData
 
-var tile1_cords: Vector2
-var tile2_cords: Vector2
+var cell1: Vector2i
+var cell2: Vector2i
+var tile_identifiers: TileIdentifiers
 
-func _init(tile1: Vector2, tile2: Vector2) -> void:
-	self.tile1_cords = tile1
-	self.tile2_cords = tile2
+func _init(tile1: Vector2i, tile2: Vector2i, _tile_identifiers: TileIdentifiers = null) -> void:
+	self.cell1 = tile1
+	self.cell2 = tile2
+	self.tile_identifiers = _tile_identifiers if _tile_identifiers else TileIdentifiers.new()
 
 func as_array() -> PackedVector2Array:
-	return PackedVector2Array([tile1_cords, tile2_cords])
+	return PackedVector2Array([cell1, cell2])

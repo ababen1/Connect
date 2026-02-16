@@ -1,9 +1,9 @@
-[gd_resource type="Resource" load_steps=2 format=2]
+[gd_resource type="Resource" script_class="DifficultyData" format=3 uid="uid://b6f5rsc0wt7i8"]
 
-[ext_resource path="res://src/DifficultyData.gd" type="Script" id=1]
+[ext_resource type="Script" uid="uid://bridh80p1siwf" path="res://src/DifficultyData.gd" id="1"]
 
 [resource]
-script = ExtResource( 1 )
+script = ExtResource("1")
 name = "Easy"
-board_size = Vector2( 5, 4 )
+board_size = Vector2i(3, 3)
 time_limit = 120.0

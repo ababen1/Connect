@@ -32,7 +32,7 @@ func sync_grid_to_tilemap() -> void:
 		for y in range(used_rect.size.y):
 			var tile_coords = used_rect.position + Vector2i(x, y)
 			# Store the dictionary in our logic grid at the padded position
-			grid[y + 1][x + 1] = TileMapFuncs.get_cell_identifiers(tilemap, tile_coords)
+			grid[y + 1][x + 1] = TileIdentifiers.from_tilemap(tile_coords, tilemap)
 
 ## Helper to see if a cell is "passable" (empty)
 func is_cell_empty(p: Vector2i) -> bool:
@@ -112,7 +112,7 @@ func find_path_from_map_coords(m1: Vector2i, m2: Vector2i) -> Array[Vector2i]:
 func get_cell_value(x, y):
 	if is_within_bounds(Vector2i(x, y)):
 		return grid[y][x]
-	return {"source_id": -2} # Out of bounds sentinel
+	return {"source_id": -1} # Out of bounds sentinel
 
 func is_within_bounds(p: Vector2i) -> bool:
 	return p.x >= 0 and p.x < grid_width and p.y >= 0 and p.y < grid_height

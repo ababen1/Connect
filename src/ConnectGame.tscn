@@ -1,14 +1,16 @@
 [gd_scene format=3 uid="uid://5irgl7lwrf0t"]
 
-[ext_resource type="PackedScene" uid="uid://cdb5wy8vb4e7s" path="res://src/scenes/ConnectGameTilemap.tscn" id="3_uyav2"]
+[ext_resource type="PackedScene" uid="uid://cdb5wy8vb4e7s" path="res://src/scenes/ConnectGameGrid.tscn" id="3_uyav2"]
 [ext_resource type="Script" uid="uid://bsrk8l4vntjf5" path="res://src/UI/DebugLabels.gd" id="4"]
 [ext_resource type="Script" uid="uid://c4val744hlv7e" path="res://src/ConnectGame.gd" id="5"]
-[ext_resource type="Script" uid="uid://cdlnp8bw2nyvv" path="res://src/UI/LevelCompleteDialog.gd" id="6"]
+[ext_resource type="PackedScene" uid="uid://b5cqxhltin1gu" path="res://src/UI/NewGameDialog.tscn" id="5_gr5gq"]
 [ext_resource type="Script" uid="uid://c1xwbc4epp7m2" path="res://src/UI/TimeLeft.gd" id="7"]
-[ext_resource type="Script" uid="uid://cx7scpo7cgvri" path="res://src/UI/GameOverDialog.gd" id="8"]
 [ext_resource type="Script" uid="uid://b57kiua0ti1qu" path="res://src/UI/ConnectGameUI.gd" id="10"]
 [ext_resource type="Script" uid="uid://cxdvrtpsbdorv" path="res://src/UI/Pause.gd" id="11"]
 [ext_resource type="Script" uid="uid://b6k883d04p83t" path="res://src/GridSFX.gd" id="12"]
+
+[sub_resource type="Theme" id="Theme_gr5gq"]
+default_font_size = 24
 
 [sub_resource type="StyleBoxFlat" id="1"]
 bg_color = Color(0.219608, 0.219608, 0.219608, 1)
@@ -27,57 +29,69 @@ one_shot = true
 [node name="SFX" type="AudioStreamPlayer" parent="." unique_id=1603971192]
 script = ExtResource("12")
 
-[node name="TileMapLayer" parent="." unique_id=1207132186 instance=ExtResource("3_uyav2")]
-position = Vector2(-1, -2)
-
 [node name="UI" type="CanvasLayer" parent="." unique_id=560256236]
 script = ExtResource("10")
 
-[node name="Buttons" type="HBoxContainer" parent="UI" unique_id=507087663]
-anchors_preset = 1
-anchor_left = 1.0
+[node name="VBoxContainer" type="VBoxContainer" parent="UI" unique_id=958676109]
+anchors_preset = 15
 anchor_right = 1.0
-offset_left = -512.0
-offset_right = -4.0
-offset_bottom = 64.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_gr5gq")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="UI/VBoxContainer" unique_id=1168075572]
+layout_mode = 2
+
+[node name="TimeLeft" type="Label" parent="UI/VBoxContainer/HBoxContainer" unique_id=1691850099]
+layout_mode = 2
+size_flags_horizontal = 8
+text = "00:00"
+script = ExtResource("7")
+timer_node = NodePath("../../../../Timer")
+
+[node name="Buttons" type="HBoxContainer" parent="UI/VBoxContainer/HBoxContainer" unique_id=507087663]
+layout_mode = 2
+size_flags_horizontal = 10
 alignment = 2
 
-[node name="Restart" type="Button" parent="UI/Buttons" unique_id=2103811991]
+[node name="Restart" type="Button" parent="UI/VBoxContainer/HBoxContainer/Buttons" unique_id=2103811991]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Restart"
 
-[node name="Hint" type="Button" parent="UI/Buttons" unique_id=1953853135]
+[node name="Hint" type="Button" parent="UI/VBoxContainer/HBoxContainer/Buttons" unique_id=1953853135]
 layout_mode = 2
 size_flags_horizontal = 0
 size_flags_vertical = 6
 text = "Hint"
 
-[node name="TimeLeft" type="Label" parent="UI" unique_id=1691850099]
-offset_left = 21.0
-offset_top = 22.0
-offset_right = 57.0
-offset_bottom = 36.0
-text = "00:00"
-script = ExtResource("7")
-timer_node = NodePath("../../Timer")
+[node name="SubViewportContainer" type="SubViewportContainer" parent="UI/VBoxContainer" unique_id=1771999344]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="UI/VBoxContainer/SubViewportContainer" unique_id=650266748]
+transparent_bg = true
+handle_input_locally = false
+snap_2d_transforms_to_pixel = true
+snap_2d_vertices_to_pixel = true
+canvas_item_default_texture_filter = 3
+size = Vector2i(1152, 602)
+render_target_update_mode = 4
+
+[node name="GameGrid" parent="UI/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1207132186 instance=ExtResource("3_uyav2")]
+unique_name_in_owner = true
+position = Vector2(-1, -2)
+draw_border = false
 
 [node name="DebugLabels" type="VBoxContainer" parent="UI" unique_id=963834346]
 offset_right = 171.0
 offset_bottom = 109.0
 mouse_filter = 2
 script = ExtResource("4")
-
-[node name="GameOverDialog" type="AcceptDialog" parent="UI" unique_id=1961361360]
-script = ExtResource("8")
-
-[node name="LevelCompleteDialog" type="AcceptDialog" parent="UI" unique_id=823693668]
-oversampling_override = 1.0
-position = Vector2i(0, 36)
-size = Vector2i(109, 100)
-visible = true
-script = ExtResource("6")
 
 [node name="Pause" type="Panel" parent="UI" unique_id=1373248451]
 process_mode = 3
@@ -109,8 +123,13 @@ layout_mode = 2
 size_flags_horizontal = 6
 text = "resume"
 
+[node name="NewGameDialog" parent="UI" unique_id=1943429357 instance=ExtResource("5_gr5gq")]
+size_flags_horizontal = 4
+size_flags_vertical = 6
+
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1789344933]
 layer = -99
+visible = false
 
 [node name="ColorRect" type="ColorRect" parent="CanvasLayer" unique_id=410314458]
 anchors_preset = 15
@@ -123,9 +142,10 @@ color = Color(0, 0, 0, 0.270588)
 [connection signal="game_over" from="." to="UI" method="_on_ConnectGame_game_over"]
 [connection signal="level_completed" from="." to="SFX" method="_on_ConnectGame_level_completed"]
 [connection signal="level_completed" from="." to="UI" method="_on_ConnectGame_level_completed"]
-[connection signal="time_limit_changed" from="." to="UI/TimeLeft" method="_on_ConnectGame_time_limit_changed"]
+[connection signal="time_limit_changed" from="." to="UI/VBoxContainer/HBoxContainer/TimeLeft" method="_on_ConnectGame_time_limit_changed"]
 [connection signal="next_level" from="UI" to="." method="_on_UI_next_level"]
-[connection signal="pressed" from="UI/Buttons/Restart" to="." method="_on_Restart_pressed"]
-[connection signal="pressed" from="UI/Buttons/Restart" to="UI/TimeLeft" method="_on_Restart_pressed"]
-[connection signal="pressed" from="UI/Buttons/Hint" to="." method="_on_Hint_pressed"]
+[connection signal="pressed" from="UI/VBoxContainer/HBoxContainer/Buttons/Restart" to="." method="_on_Restart_pressed"]
+[connection signal="pressed" from="UI/VBoxContainer/HBoxContainer/Buttons/Restart" to="UI/VBoxContainer/HBoxContainer/TimeLeft" method="_on_Restart_pressed"]
+[connection signal="pressed" from="UI/VBoxContainer/HBoxContainer/Buttons/Hint" to="." method="_on_Hint_pressed"]
 [connection signal="pressed" from="UI/Pause/CenterContainer/Button" to="UI/Pause" method="_on_Button_pressed"]
+[connection signal="difficulty_selected" from="UI/NewGameDialog" to="." method="_on_new_game_dialog_difficulty_selected"]
