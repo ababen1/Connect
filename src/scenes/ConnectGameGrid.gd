@@ -15,6 +15,7 @@ const DEFAULT_BOARD_SIZE = Vector2i(5,6)
 signal pair_cleared(pair)
 signal misplay
 signal board_cleared
+signal path_animation_finished(path: Line2D)
 
 var selected_cell: Vector2i 
 var _tiles_areas2D: Dictionary = {}
@@ -22,6 +23,7 @@ var pathfinder: = OnetPathfinder.new(self)
 var pairs: Array[PairData]
 
 func _ready() -> void:
+	path_animation_finished.connect(func(l: Line2D): l.queue_free())
 	if get_tree().current_scene == self:
 		setup_board()
 				
@@ -52,7 +54,6 @@ func center_camera() -> void:
 func get_possible_tiles_of_categories(categories: Array[String]) -> Array[TileData]:
 	var tiles: Array[TileData] = []
 	for tile: TileData in TileMapFuncs.get_possible_tiles(tile_set):
-		print(tile.get_custom_data("category"))
 		if tile.get_custom_data("category") in categories:
 			tiles.append(tile)
 	return tiles
@@ -72,11 +73,12 @@ func find_path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 func draw_path(points: Array[Vector2i], time_on_screen: float = clear_path_after) -> void:
 	var line: = _create_line(line_template, points)
 	add_child(line)
+	line.create_tween().tween_property(line, "modulate:a", 1.0, 0.1).from(0.0)
 	if time_on_screen > 0:
 		await get_tree().create_timer(time_on_screen).timeout
-		line.queue_free()
 	else:
 		await get_tree().process_frame
+	line.queue_free()
 
 func display_hint() -> void:
 	_setup_line(hint_line, get_all_possible_paths().values().pick_random())
@@ -86,7 +88,7 @@ func display_hint() -> void:
 
 func shuffle_board() -> void:
 	var all_cells = get_used_cells()
-	while not all_cells.is_empty():
+	while all_cells.size() >= 2:
 		var cell1 = all_cells.pop_front()
 		all_cells.shuffle()
 		var cell1_tile = TileIdentifiers.from_tilemap(cell1, self)
@@ -95,6 +97,7 @@ func shuffle_board() -> void:
 		var cell2_tile = TileIdentifiers.from_tilemap(cell2, self)
 		set_cell(cell1, cell2_tile.source_id, cell2_tile.atlas_coords)
 		set_cell(cell2, cell1_tile.source_id, cell1_tile.atlas_coords)
+	pathfinder.sync_grid_to_tilemap()
 
 func remove_pair(pair: PairData) -> void:
 	set_cell(pair.cell1, -1)
@@ -237,4 +240,8 @@ func _handle_pair_cleared(pair: PairData, path: Array[Vector2i]) -> void:
 			board_cleared.emit()
 		else:
 			while !has_possible_paths():
-				shuffle_board()
+				var attempts = 100
+				while (attempts > 0):
+					shuffle_board()
+					attempts -= 1
+				

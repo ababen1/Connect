@@ -19,12 +19,12 @@ func sync_grid_to_tilemap() -> void:
 	grid_height = used_rect.size.y + 2
 	map_offset = used_rect.position - Vector2i(1, 1)
 	
-	# 2. Initialize with empty dictionaries (source_id: -1)
+	# 2. Initialize with empty data
 	grid = []
 	for y in range(grid_height):
 		var row = []
 		for x in range(grid_width):
-			row.append({"source_id": -1, "atlas_coords": -Vector2.ONE})
+			row.append(TileIdentifiers.new())
 		grid.append(row)
 	
 	# 3. Fill with data from TileMapFuncs
@@ -33,6 +33,8 @@ func sync_grid_to_tilemap() -> void:
 			var tile_coords = used_rect.position + Vector2i(x, y)
 			# Store the dictionary in our logic grid at the padded position
 			grid[y + 1][x + 1] = TileIdentifiers.from_tilemap(tile_coords, tilemap)
+	
+	print_grid()
 
 ## Helper to see if a cell is "passable" (empty)
 func is_cell_empty(p: Vector2i) -> bool:
@@ -116,3 +118,9 @@ func get_cell_value(x, y):
 
 func is_within_bounds(p: Vector2i) -> bool:
 	return p.x >= 0 and p.x < grid_width and p.y >= 0 and p.y < grid_height
+
+func print_grid() -> void:
+	for i in grid.size():
+		for j in grid[i].size():
+			printraw(grid[i][j].atlas_coords)
+		printraw("\n")

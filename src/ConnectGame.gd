@@ -27,7 +27,6 @@ var current_state: = STATE.SELECT_DIFFICULTY : set = set_current_state
 func _ready() -> void:
 	if not OS.is_debug_build():
 		debug_mode = false
-	game_grid.pair_cleared.connect(_on_pair_cleared)
 	timer.timeout.connect(_on_timeout)
 	set_current_state(STATE.SELECT_DIFFICULTY)
 

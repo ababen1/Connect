@@ -79,7 +79,7 @@ handle_input_locally = false
 snap_2d_transforms_to_pixel = true
 snap_2d_vertices_to_pixel = true
 canvas_item_default_texture_filter = 3
-size = Vector2i(1152, 602)
+size = Vector2i(2, 2)
 render_target_update_mode = 0
 
 [node name="GameGrid" parent="UI/VBoxContainer/SubViewportContainer/SubViewport" unique_id=1207132186 instance=ExtResource("3_uyav2")]
