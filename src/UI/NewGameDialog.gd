@@ -11,4 +11,4 @@ func _ready() -> void:
 			
 func _on_difficulty_btn_pressed(btn: DifficultyButton) -> void:
 	emit_signal("difficulty_selected", btn.data)
-	queue_free()
+	hide()

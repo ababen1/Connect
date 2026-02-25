@@ -10,6 +10,8 @@ const DEFAULT_BOARD_SIZE = Vector2i(5,6)
 ## A template for a line2D that will be used to display the path
 @export var line_template: Line2D
 
+@onready var hint_line: Line2D = %HintLine
+
 signal pair_cleared(pair)
 signal misplay
 signal board_cleared
@@ -56,7 +58,7 @@ func get_possible_tiles_of_categories(categories: Array[String]) -> Array[TileDa
 	return tiles
 
 func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
-	$Hint.remove_hint()
+	hint_line.hide()
 	set_board_size(board_size_)
 	setup_board()
 
@@ -68,20 +70,19 @@ func find_path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	return path
 
 func draw_path(points: Array[Vector2i], time_on_screen: float = clear_path_after) -> void:
-	var line: = line_template.duplicate()
-	line.clear_points()
-	line.show()
-	line.position = Vector2.ZERO
+	var line: = _create_line(line_template, points)
 	add_child(line)
-	for p in points:
-		line.add_point(map_to_local(p))
-	await get_tree().create_timer(time_on_screen).timeout
-	line.queue_free()
+	if time_on_screen > 0:
+		await get_tree().create_timer(time_on_screen).timeout
+		line.queue_free()
+	else:
+		await get_tree().process_frame
 
 func display_hint() -> void:
-	var possible_paths = get_all_possible_paths().values()
-	var hint_path: PathData = possible_paths.pick_random()
-	$Hint.show_hint(hint_path)
+	_setup_line(hint_line, get_all_possible_paths().values().pick_random())
+	pair_cleared.connect(func(_pair): 
+		hint_line.hide(), CONNECT_ONE_SHOT)
+	
 
 func shuffle_board() -> void:
 	var all_cells = get_used_cells()
@@ -102,16 +103,29 @@ func remove_pair(pair: PairData) -> void:
 		if p.tile_identifiers == pair.tile_identifiers:
 			pairs.erase(p)
 
+## Dictionary[PairData: Array[Vector2i]]
 func get_all_possible_paths() -> Dictionary:
 	var paths: = {}
 	for pair: PairData in pairs:
-		var possible_path = find_path(pair.cell1, pair.cell2)
+		var possible_path: Array[Vector2i] = find_path(pair.cell1, pair.cell2)
 		if possible_path:
 			paths[pair] = possible_path
 	return paths
 
 func has_possible_paths() -> bool:
 	return not get_all_possible_paths().is_empty()
+
+func _setup_line(line: Line2D, grid_points: Array[Vector2i]) -> void:
+	line.clear_points()
+	line.show()
+	line.position = Vector2.ZERO
+	for p in grid_points:
+		line.add_point(map_to_local(p))
+
+func _create_line(template: Line2D, points: Array[Vector2i]) -> Line2D:
+	var line: = template.duplicate()
+	_setup_line(line, points)
+	return line
 
 func _draw() -> void:
 	## Draw outline around the hovered cell
@@ -218,7 +232,7 @@ func check_win() -> bool:
 func _handle_pair_cleared(pair: PairData, path: Array[Vector2i]) -> void:	
 		await draw_path(path)
 		remove_pair(pair)
-		pair_cleared.emit()
+		pair_cleared.emit(pair)
 		if check_win():
 			board_cleared.emit()
 		else:

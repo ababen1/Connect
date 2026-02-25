@@ -2,7 +2,6 @@
 
 [ext_resource type="TileSet" uid="uid://cyhlnxualpbr6" path="res://assets/Tiles.tres" id="1_ppxek"]
 [ext_resource type="Script" uid="uid://bp6n4lw1b8u8m" path="res://src/scenes/ConnectGameGrid.gd" id="1_trmpw"]
-[ext_resource type="Script" uid="uid://b5bvmwpa7qbc7" path="res://src/HintLine.gd" id="3_uv358"]
 
 [node name="ConnectGameGrid" type="TileMapLayer" unique_id=1207132186 node_paths=PackedStringArray("line_template")]
 texture_filter = 3
@@ -16,10 +15,10 @@ line_template = NodePath("LineTemplate")
 position = Vector2(79, 78)
 zoom = Vector2(2.8, 2.8)
 
-[node name="Hint" type="Line2D" parent="." unique_id=1870967939]
+[node name="HintLine" type="Line2D" parent="." unique_id=1870967939]
+unique_name_in_owner = true
 width = 2.0
 default_color = Color(0.815686, 0.792157, 0.792157, 1)
-script = ExtResource("3_uv358")
 
 [node name="LineTemplate" type="Line2D" parent="." unique_id=218653533]
 visible = false

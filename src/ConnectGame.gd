@@ -18,7 +18,6 @@ enum STATE {
 
 @onready var game_grid: ConnectGameGrid = %GameGrid
 @onready var timer: Timer = $Timer
-@onready var ui = $UI
 
 var moves_taken: int = 0
 var total_moves_taken: int = 0
@@ -30,7 +29,7 @@ func _ready() -> void:
 		debug_mode = false
 	game_grid.pair_cleared.connect(_on_pair_cleared)
 	timer.timeout.connect(_on_timeout)
-	ui.new_game.connect(start_new_game)
+	set_current_state(STATE.SELECT_DIFFICULTY)
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause"):
@@ -38,6 +37,9 @@ func _input(event: InputEvent) -> void:
 
 func set_current_state(val: STATE) -> void:
 	current_state = val
+	%HeaderBar.visible =  current_state == STATE.PLAYING
+	%SubViewportContainer.visible = current_state in [STATE.PLAYING, STATE.GAME_OVER]
+	%NewGameDialog.visible = current_state == STATE.SELECT_DIFFICULTY
 	
 	
 func start_new_game(difficulty: DifficultyData) -> void:
@@ -46,6 +48,7 @@ func start_new_game(difficulty: DifficultyData) -> void:
 	moves_taken = 0
 	total_moves_taken = 0
 	set_time_limit(difficulty.time_limit)
+	set_current_state(STATE.PLAYING)
 	game_grid.start_new_game(difficulty.board_size)
 	await get_tree().process_frame
 	check_board()
@@ -69,7 +72,16 @@ func _on_pair_cleared(_pair) -> void:
 	check_board()
 
 func _on_Restart_pressed() -> void:
-	ui.start_new_game()
+	var confirmation = ConfirmationDialog.new()
+	confirmation.dialog_text = "Start a new game?"
+	confirmation.position = get_viewport_rect().get_center()
+	var rect_size = Vector2(300,150)
+	var rect = Rect2(get_viewport_rect().get_center() - rect_size / 2, rect_size)
+	add_child(confirmation)
+	confirmation.popup(rect)
+	
+	confirmation.canceled.connect(func(): confirmation.queue_free())
+	confirmation.confirmed.connect(func(): set_current_state(STATE.SELECT_DIFFICULTY))
 
 func _on_timeout() -> void:
 	var results: Dictionary = {
@@ -93,7 +105,6 @@ func check_board() -> void:
 
 func _on_Hint_pressed() -> void:
 	game_grid.display_hint()
-
 
 func _on_new_game_dialog_difficulty_selected(difficulty: DifficultyData) -> void:
 	start_new_game(difficulty)
