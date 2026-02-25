@@ -62,6 +62,7 @@ func start_new_game(board_size_: Vector2 = DEFAULT_BOARD_SIZE) -> void:
 	hint_line.hide()
 	set_board_size(board_size_)
 	setup_board()
+	_check_for_shuffle()
 
 func find_path(from: Vector2i, to: Vector2i) -> Array[Vector2i]:
 	var path: Array[Vector2i] = []
@@ -239,9 +240,13 @@ func _handle_pair_cleared(pair: PairData, path: Array[Vector2i]) -> void:
 		if check_win():
 			board_cleared.emit()
 		else:
-			while !has_possible_paths():
-				var attempts = 100
-				while (attempts > 0):
-					shuffle_board()
-					attempts -= 1
+			_check_for_shuffle()
 				
+
+func _check_for_shuffle() -> void:
+	var attempts = 100
+	while !has_possible_paths() and attempts > 0:
+		shuffle_board()
+		attempts -= 1
+	if attempts <= 0:
+		print("No possible path found after 100 shuffles!")

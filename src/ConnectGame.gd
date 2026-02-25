@@ -98,9 +98,6 @@ func check_board() -> void:
 	if game_grid.check_win():
 		level_completed.emit(current_level)
 		timer.stop()
-	else:
-		while not game_grid.has_possible_paths():
-			game_grid.shuffle_board()
 
 func _on_Hint_pressed() -> void:
 	game_grid.display_hint()
