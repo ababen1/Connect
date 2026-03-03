@@ -5,9 +5,10 @@
 
 [node name="ConnectGameGrid" type="TileMapLayer" unique_id=1207132186 node_paths=PackedStringArray("line_template")]
 texture_filter = 3
+tile_map_data = PackedByteArray(0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 34, 0, 0, 0, 1, 0, 0, 0, 47, 0, 2, 0, 38, 0, 0, 0, 0, 0, 1, 0, 47, 0, 2, 0, 38, 0, 0, 0, 1, 0, 1, 0, 47, 0, 0, 0, 34, 0, 0, 0)
 tile_set = ExtResource("1_ppxek")
 script = ExtResource("1_trmpw")
-board_size = Vector2i(3, 2)
+board_size = Vector2i(2, 2)
 include_catagories = Array[String](["food"])
 line_template = NodePath("LineTemplate")
 

@@ -596,7 +596,6 @@ texture = ExtResource("1_2iwsc")
 8:17/0/custom_data_0 = "food"
 9:17/0 = 0
 9:17/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
-9:17/0/custom_data_0 = "food"
 10:17/0 = 0
 10:17/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 10:17/0/custom_data_0 = "food"

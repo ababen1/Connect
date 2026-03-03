@@ -20,7 +20,6 @@ signal path_animation_finished(path: Line2D)
 var selected_cell: Vector2i 
 var _tiles_areas2D: Dictionary = {}
 var pathfinder: = OnetPathfinder.new(self)
-var pairs: Array[PairData]
 
 func _ready() -> void:
 	path_animation_finished.connect(func(l: Line2D): l.queue_free())
@@ -31,6 +30,14 @@ func _process(_delta: float) -> void:
 	queue_redraw()
 		
 func _unhandled_input(event: InputEvent) -> void:
+	#region Debugging shortcuts
+	if OS.is_debug_build(): 
+		if Input.is_action_just_pressed("ui_home"):
+			shuffle_board()
+		if Input.is_action_just_pressed("ui_end"):
+			setup_board()
+	
+	#endregion 
 	if event.is_action_pressed("click") or event.is_action_pressed("ui_accept"):
 		var cell_clicked = get_mouse_cell()
 		if not TileMapFuncs.is_empty_cell(self, cell_clicked):
@@ -89,28 +96,68 @@ func display_hint() -> void:
 
 func shuffle_board() -> void:
 	var all_cells = get_used_cells()
-	while all_cells.size() >= 2:
-		var cell1 = all_cells.pop_front()
-		all_cells.shuffle()
+	if all_cells.size() < 2:
+		return  # No need to shuffle if there are fewer than 2 tiles
+
+	all_cells.shuffle()  # randomize their order
+
+	# Perform a number of random swaps
+	var swap_count = randi_range(5,10)  # Adjust this number to increase or decrease the shuffling
+	for i in range(swap_count):
+		var cell1_index = randi() % all_cells.size()
+		var cell2_index = randi() % all_cells.size()
+
+		var cell1 = all_cells[cell1_index]
+		var cell2 = all_cells[cell2_index]
+
 		var cell1_tile = TileIdentifiers.from_tilemap(cell1, self)
-		var cell2 = all_cells.pop_front()
-		all_cells.shuffle()
 		var cell2_tile = TileIdentifiers.from_tilemap(cell2, self)
+
 		set_cell(cell1, cell2_tile.source_id, cell2_tile.atlas_coords)
 		set_cell(cell2, cell1_tile.source_id, cell1_tile.atlas_coords)
+
 	pathfinder.sync_grid_to_tilemap()
+
+
 
 func remove_pair(pair: PairData) -> void:
 	set_cell(pair.cell1, -1)
 	set_cell(pair.cell2, -1)
-	for p: PairData in pairs:
-		if p.tile_identifiers == pair.tile_identifiers:
-			pairs.erase(p)
+
+## Returns an array of all the types of tiles currently in the tilemap. (For example, all the food items)
+func get_all_tiles_types() -> Array[Dictionary]:
+	var types: Array[Dictionary] = []
+	for cell in get_used_cells():
+		var current_tile: Dictionary = TileIdentifiers.from_tilemap(cell, self).to_dict()
+		if !(current_tile in types):
+			types.append(current_tile)
+	return types
+
+## Returns all the cells with a given tile identifiers
+func get_cells_of_type(type: Dictionary) -> Array[Vector2i]:
+	return get_used_cells().filter(func(x: Vector2i): 
+		return TileIdentifiers.from_tilemap(x, self).to_dict() == type)
+
+func get_all_pairs() -> Array[PairData]:
+	var pairs: Array[PairData] = []
+	for type: Dictionary in get_all_tiles_types():
+		var cells_of_type: = get_cells_of_type(type)
+		if cells_of_type.size() % 2 != 0:
+			printerr("Error: there is a solo tile of type ", type)
+		else:
+			while not cells_of_type.is_empty():
+				pairs.append(PairData.new
+				(cells_of_type.pop_front(), 
+				cells_of_type.pop_front(), 
+				TileIdentifiers.from_dict(type)))
+	return pairs
+		
+		
 
 ## Dictionary[PairData: Array[Vector2i]]
 func get_all_possible_paths() -> Dictionary:
 	var paths: = {}
-	for pair: PairData in pairs:
+	for pair: PairData in get_all_pairs():
 		var possible_path: Array[Vector2i] = find_path(pair.cell1, pair.cell2)
 		if possible_path:
 			paths[pair] = possible_path
@@ -185,7 +232,6 @@ func fill_board() -> void:
 		var tile_identifiers: = TileMapFuncs.get_identifiers_from_meta(tile)
 		set_cell(cell1, tile_identifiers.source_id, tile_identifiers.atlas_coords)
 		set_cell(cell2, tile_identifiers.source_id, tile_identifiers.atlas_coords)
-		pairs.append(PairData.new(cell1, cell2, tile_identifiers))
 		possible_tiles.erase(tile)
 
 func get_rect() -> Rect2:
